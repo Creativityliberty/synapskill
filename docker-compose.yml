@@ -1,0 +1,18 @@
+services:
+  synapse-mcp:
+    build: .
+    container_name: synapse-mcp
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - SYNAPSE_ALLOW_EXECUTE=true
+      - SYNAPSE_STATE_DB=/app/state/receipts.sqlite
+      - SYNAPSE_LESSONS_DB=/app/state/lessons.sqlite
+      - SYNAPSE_MAX_CALLS_PER_MIN=300
+    volumes:
+      - synapse-state:/app/state
+
+volumes:
+  synapse-state:

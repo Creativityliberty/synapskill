@@ -1,0 +1,32 @@
+{
+  "interface": {
+    "displayName": "N\u00fcmtema Synapse Cognitive OS",
+    "shortDescription": "CoR, RRLA et MCP local",
+    "longDescription": "Skills N\u00fcmtema pour missions CoR, RRLA, Reflexion et Agent Forge. Contient un serveur MCP stdio ex\u00e9cutable localement par un h\u00f4te compatible ; les scripts du plugin ne d\u00e9marrent pas automatiquement dans ChatGPT.",
+    "developerName": "N\u00fcmtema",
+    "category": "Productivity",
+    "defaultPrompt": [
+      "Active /start : transforme ma mission en contrats CoR et organise un workflow RRLA.",
+      "Cr\u00e9e un blueprint Agent Forge pour cette mission avec tests et validations.",
+      "Audite ce workflow avec Reflexion en respectant les permissions des outils."
+    ],
+    "brandColor": "#203AB3",
+    "capabilities": []
+  },
+  "name": "numtema-synapse-cognitive-os",
+  "version": "0.3.0",
+  "description": "N\u00fcmtema Synapse Cognitive OS : CoR, RRLA, Reflexion, Agent Forge et serveur MCP stdio local dual-era (sans compte externe).",
+  "author": {
+    "name": "N\u00fcmtema"
+  },
+  "keywords": [
+    "numtema",
+    "synapse",
+    "cor",
+    "rrla",
+    "reflexion",
+    "agentic-workflows",
+    "meta-prompting"
+  ],
+  "skills": "./skills"
+}

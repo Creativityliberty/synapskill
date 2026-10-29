@@ -1,0 +1,58 @@
+{
+  "mission_id": "NUM-DEMO-2026-01",
+  "context": {
+    "type": "exemple_fictif",
+    "domain": "marketing",
+    "environment": "local_offline"
+  },
+  "steps": [
+    {
+      "id": "brief",
+      "agent_id": "FocusAgent",
+      "objective": "Structurer les données de l'offre transmises par l'utilisateur",
+      "tool": "local.extract_fields",
+      "capability": "read",
+      "params": {
+        "data": {
+          "offer": "Audit stratégique PME",
+          "audience": "Dirigeants de PME",
+          "benefit": "Clarifier les priorités marketing"
+        },
+        "fields": ["offer", "audience", "benefit"]
+      },
+      "checks": {"required_keys": ["offer", "audience", "benefit"]},
+      "max_revisions": 0,
+      "expected_keys": ["offer", "audience", "benefit"]
+    },
+    {
+      "id": "copy",
+      "agent_id": "Rhetorica",
+      "objective": "Composer les sections fondamentales de la landing page sans générer de fausses preuves",
+      "tool": "local.render_template",
+      "capability": "draft",
+      "depends_on": ["brief"],
+      "params": {
+        "values_from_task": "brief",
+        "template": "HERO : {{offer}} pour les {{audience}}.\nBÉNÉFICE : {{benefit}}.\nCTA : Réserver un échange exploratoire."
+      },
+      "checks": {"required_keys": ["text"], "required_text": ["HERO", "BÉNÉFICE", "CTA"]},
+      "expected_keys": ["text"],
+      "max_revisions": 1
+    },
+    {
+      "id": "quality_gate",
+      "agent_id": "VerifierAgent",
+      "objective": "Vérifier la présence des sections contractuelles",
+      "tool": "local.assert_contains",
+      "capability": "read",
+      "depends_on": ["copy"],
+      "params": {
+        "source_task": "copy",
+        "fragments": ["HERO", "BÉNÉFICE", "CTA"]
+      },
+      "checks": {"required_keys": ["passed", "evidence"], "require_passed": true},
+      "expected_keys": ["passed", "evidence"],
+      "max_revisions": 0
+    }
+  ]
+}

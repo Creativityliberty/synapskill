@@ -1,0 +1,49 @@
+{
+  "version": "2.0",
+  "contract_id": "COR-001",
+  "identity": {
+    "agent_id": "copy-agent",
+    "supervisor": "synapse",
+    "role": "Architecte de conversion"
+  },
+  "mission": {
+    "objective": "Produire une structure de landing page pour une offre fictive d'audit marketing",
+    "expected_outcome": "Structure et copywriting exploitables"
+  },
+  "context": {
+    "audience": "Petites entreprises",
+    "source_provenance": "Brief fictif fourni par le demandeur"
+  },
+  "inputs": {
+    "required": ["brief_offre"],
+    "optional": ["charte_graphique"]
+  },
+  "scope": {
+    "allowed_tasks": ["analyser", "rediger", "proposer_sections"],
+    "excluded_tasks": ["publication", "depense", "deploiement"]
+  },
+  "tools": {"allowlist": ["knowledge_retrieval"]},
+  "permissions": {
+    "requested_tools": ["knowledge_retrieval"],
+    "external_write": false,
+    "financial_spend": false,
+    "deployment": false,
+    "requires_approval": ["publication"]
+  },
+  "deliverables": {
+    "format": "structured_json",
+    "required": ["page_outline", "copy_sections", "assumptions", "sources_used"]
+  },
+  "validation": {
+    "mandatory_checks": ["sections_present", "claims_verified", "no_fabricated_testimonials"],
+    "independent_review": true
+  },
+  "handoff": {"destination": "synapse", "required": ["deliverables", "validation_report", "unresolved_issues"]},
+  "reflection": {"enabled": true, "max_revisions": 2},
+  "termination": {
+    "success": "Toutes les vérifications obligatoires réussissent",
+    "blocked": "Entrée indispensable manquante",
+    "failed": "Limite de révisions atteinte",
+    "approval_required": "Publication externe demandée"
+  }
+}

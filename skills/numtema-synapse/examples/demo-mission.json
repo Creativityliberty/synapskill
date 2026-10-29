@@ -1,0 +1,292 @@
+{
+  "version": "0.2.0",
+  "mission_id": "NUM-DEMO-2026-01",
+  "tasks": [
+    {
+      "id": "brief",
+      "contract": {
+        "version": "2.0",
+        "contract_id": "NUM-DEMO-2026-01:brief",
+        "identity": {
+          "agent_id": "FocusAgent",
+          "role": "FocusAgent",
+          "supervisor": "synapse_orchestrator"
+        },
+        "mission": {
+          "objective": "Structurer les données de l'offre transmises par l'utilisateur",
+          "expected_outcome": "Validated task artifact"
+        },
+        "context": {
+          "type": "exemple_fictif",
+          "domain": "marketing",
+          "environment": "local_offline"
+        },
+        "inputs": {
+          "required": [],
+          "optional": []
+        },
+        "scope": {
+          "allowed_tasks": [
+            "Structurer les données de l'offre transmises par l'utilisateur"
+          ],
+          "excluded_tasks": []
+        },
+        "tools": {
+          "allowlist": [
+            "local.extract_fields"
+          ]
+        },
+        "permissions": {
+          "read": true,
+          "draft": true,
+          "external_write": false,
+          "financial_spend": false,
+          "deployment": false,
+          "requested_tools": [
+            "local.extract_fields"
+          ],
+          "require_approval": []
+        },
+        "deliverables": {
+          "format": "structured_json",
+          "required": [
+            "offer",
+            "audience",
+            "benefit"
+          ]
+        },
+        "validation": {
+          "mandatory_checks": [
+            "task_checks"
+          ]
+        },
+        "handoff": {
+          "destination": "synapse_orchestrator",
+          "include": [
+            "deliverables",
+            "validation_report"
+          ]
+        },
+        "reflection": {
+          "enabled": true,
+          "max_revisions": 0
+        },
+        "termination": {
+          "success": "All task checks pass",
+          "blocked": "Missing inputs or permission",
+          "failed": "Bounded retries exhausted",
+          "approval_required": "Sensitive action pending host grant"
+        }
+      },
+      "tool": "local.extract_fields",
+      "depends_on": [],
+      "params": {
+        "data": {
+          "offer": "Audit stratégique PME",
+          "audience": "Dirigeants de PME",
+          "benefit": "Clarifier les priorités marketing"
+        },
+        "fields": [
+          "offer",
+          "audience",
+          "benefit"
+        ]
+      },
+      "checks": {
+        "required_keys": [
+          "offer",
+          "audience",
+          "benefit"
+        ]
+      }
+    },
+    {
+      "id": "copy",
+      "contract": {
+        "version": "2.0",
+        "contract_id": "NUM-DEMO-2026-01:copy",
+        "identity": {
+          "agent_id": "Rhetorica",
+          "role": "Rhetorica",
+          "supervisor": "synapse_orchestrator"
+        },
+        "mission": {
+          "objective": "Composer les sections fondamentales de la landing page sans générer de fausses preuves",
+          "expected_outcome": "Validated task artifact"
+        },
+        "context": {
+          "type": "exemple_fictif",
+          "domain": "marketing",
+          "environment": "local_offline"
+        },
+        "inputs": {
+          "required": [],
+          "optional": []
+        },
+        "scope": {
+          "allowed_tasks": [
+            "Composer les sections fondamentales de la landing page sans générer de fausses preuves"
+          ],
+          "excluded_tasks": []
+        },
+        "tools": {
+          "allowlist": [
+            "local.render_template"
+          ]
+        },
+        "permissions": {
+          "read": true,
+          "draft": true,
+          "external_write": false,
+          "financial_spend": false,
+          "deployment": false,
+          "requested_tools": [
+            "local.render_template"
+          ],
+          "require_approval": []
+        },
+        "deliverables": {
+          "format": "structured_json",
+          "required": [
+            "text"
+          ]
+        },
+        "validation": {
+          "mandatory_checks": [
+            "task_checks"
+          ]
+        },
+        "handoff": {
+          "destination": "synapse_orchestrator",
+          "include": [
+            "deliverables",
+            "validation_report"
+          ]
+        },
+        "reflection": {
+          "enabled": true,
+          "max_revisions": 1
+        },
+        "termination": {
+          "success": "All task checks pass",
+          "blocked": "Missing inputs or permission",
+          "failed": "Bounded retries exhausted",
+          "approval_required": "Sensitive action pending host grant"
+        }
+      },
+      "tool": "local.render_template",
+      "depends_on": [
+        "brief"
+      ],
+      "params": {
+        "values_from_task": "brief",
+        "template": "HERO : {{offer}} pour les {{audience}}.\nBÉNÉFICE : {{benefit}}.\nCTA : Réserver un échange exploratoire."
+      },
+      "checks": {
+        "required_keys": [
+          "text"
+        ],
+        "required_text": [
+          "HERO",
+          "BÉNÉFICE",
+          "CTA"
+        ]
+      }
+    },
+    {
+      "id": "quality_gate",
+      "contract": {
+        "version": "2.0",
+        "contract_id": "NUM-DEMO-2026-01:quality_gate",
+        "identity": {
+          "agent_id": "VerifierAgent",
+          "role": "VerifierAgent",
+          "supervisor": "synapse_orchestrator"
+        },
+        "mission": {
+          "objective": "Vérifier la présence des sections contractuelles",
+          "expected_outcome": "Validated task artifact"
+        },
+        "context": {
+          "type": "exemple_fictif",
+          "domain": "marketing",
+          "environment": "local_offline"
+        },
+        "inputs": {
+          "required": [],
+          "optional": []
+        },
+        "scope": {
+          "allowed_tasks": [
+            "Vérifier la présence des sections contractuelles"
+          ],
+          "excluded_tasks": []
+        },
+        "tools": {
+          "allowlist": [
+            "local.assert_contains"
+          ]
+        },
+        "permissions": {
+          "read": true,
+          "draft": true,
+          "external_write": false,
+          "financial_spend": false,
+          "deployment": false,
+          "requested_tools": [
+            "local.assert_contains"
+          ],
+          "require_approval": []
+        },
+        "deliverables": {
+          "format": "structured_json",
+          "required": [
+            "passed",
+            "evidence"
+          ]
+        },
+        "validation": {
+          "mandatory_checks": [
+            "task_checks"
+          ]
+        },
+        "handoff": {
+          "destination": "synapse_orchestrator",
+          "include": [
+            "deliverables",
+            "validation_report"
+          ]
+        },
+        "reflection": {
+          "enabled": true,
+          "max_revisions": 0
+        },
+        "termination": {
+          "success": "All task checks pass",
+          "blocked": "Missing inputs or permission",
+          "failed": "Bounded retries exhausted",
+          "approval_required": "Sensitive action pending host grant"
+        }
+      },
+      "tool": "local.assert_contains",
+      "depends_on": [
+        "copy"
+      ],
+      "params": {
+        "source_task": "copy",
+        "fragments": [
+          "HERO",
+          "BÉNÉFICE",
+          "CTA"
+        ]
+      },
+      "checks": {
+        "required_keys": [
+          "passed",
+          "evidence"
+        ],
+        "require_passed": true
+      }
+    }
+  ]
+}

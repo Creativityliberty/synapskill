@@ -1,0 +1,139 @@
+{
+  "mission_id": "NUM-DEMO-2026-01",
+  "status": "COMPLETED",
+  "order": [
+    "brief",
+    "copy",
+    "quality_gate"
+  ],
+  "tasks": {
+    "brief": {
+      "contract_id": "NUM-DEMO-2026-01:brief",
+      "status": "COMPLETED",
+      "deliverables": {
+        "offer": "Audit stratégique PME",
+        "audience": "Dirigeants de PME",
+        "benefit": "Clarifier les priorités marketing"
+      },
+      "output": {
+        "offer": "Audit stratégique PME",
+        "audience": "Dirigeants de PME",
+        "benefit": "Clarifier les priorités marketing"
+      },
+      "evidence": [
+        {
+          "check": "task_checks",
+          "passed": true
+        }
+      ],
+      "issues": [],
+      "attempts": 1,
+      "cached": false,
+      "validation": {
+        "mandatory_passed": true,
+        "evidence": [
+          {
+            "check": "task_checks",
+            "passed": true
+          }
+        ]
+      }
+    },
+    "copy": {
+      "contract_id": "NUM-DEMO-2026-01:copy",
+      "status": "COMPLETED",
+      "deliverables": {
+        "text": "HERO : Audit stratégique PME pour les Dirigeants de PME.\nBÉNÉFICE : Clarifier les priorités marketing.\nCTA : Réserver un échange exploratoire."
+      },
+      "output": {
+        "text": "HERO : Audit stratégique PME pour les Dirigeants de PME.\nBÉNÉFICE : Clarifier les priorités marketing.\nCTA : Réserver un échange exploratoire."
+      },
+      "evidence": [
+        {
+          "check": "task_checks",
+          "passed": true
+        }
+      ],
+      "issues": [],
+      "attempts": 1,
+      "cached": false,
+      "validation": {
+        "mandatory_passed": true,
+        "evidence": [
+          {
+            "check": "task_checks",
+            "passed": true
+          }
+        ]
+      }
+    },
+    "quality_gate": {
+      "contract_id": "NUM-DEMO-2026-01:quality_gate",
+      "status": "COMPLETED",
+      "deliverables": {
+        "passed": true,
+        "missing": [],
+        "evidence": [
+          {
+            "check": "contains",
+            "fragment": "HERO",
+            "passed": true
+          },
+          {
+            "check": "contains",
+            "fragment": "BÉNÉFICE",
+            "passed": true
+          },
+          {
+            "check": "contains",
+            "fragment": "CTA",
+            "passed": true
+          }
+        ]
+      },
+      "output": {
+        "passed": true,
+        "missing": [],
+        "evidence": [
+          {
+            "check": "contains",
+            "fragment": "HERO",
+            "passed": true
+          },
+          {
+            "check": "contains",
+            "fragment": "BÉNÉFICE",
+            "passed": true
+          },
+          {
+            "check": "contains",
+            "fragment": "CTA",
+            "passed": true
+          }
+        ]
+      },
+      "evidence": [
+        {
+          "check": "task_checks",
+          "passed": true
+        }
+      ],
+      "issues": [],
+      "attempts": 1,
+      "cached": false,
+      "validation": {
+        "mandatory_passed": true,
+        "evidence": [
+          {
+            "check": "task_checks",
+            "passed": true
+          }
+        ]
+      }
+    }
+  },
+  "validation": {
+    "all_tasks_completed": true
+  },
+  "issues": []
+}

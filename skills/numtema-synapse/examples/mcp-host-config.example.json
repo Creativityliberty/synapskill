@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "numtema-synapse": {
+      "command": "python3",
+      "args": [
+        "/CHEMIN/ABSOLU/numtema-synapse-cognitive-os-v0.3.0/skills/numtema-synapse/scripts/mcp_server.py"
+      ]
+    }
+  }
+}
