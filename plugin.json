@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "numtema-synapse-cognitive-os",
-  "version": "0.5.0",
-  "description": "Nümtema Synapse Cognitive OS : Mission Studio CoR, planification DAG, Agent Forge et passerelle MCP publique anonyme (4 outils, sans exécution distante).",
+  "version": "0.6.0",
+  "description": "Synapse Cognitive OS : Mission Studio CoR, DAG, agent IA Ollama privé opt-in, MCP public anonyme à quatre outils sans exécution distante.",
   "author": {
     "name": "Nümtema"
   },
@@ -19,8 +19,8 @@
     "com.openai": {
       "interface": {
         "displayName": "Nümtema Synapse Cognitive OS",
-        "shortDescription": "CoR, RRLA et MCP public sans auth",
-        "longDescription": "Skill Nümtema avec Agent Forge, CoR, RRLA et Reflexion. Inclut un MCP stdio local et une passerelle HTTP publique sans login ni token, limitée à quatre outils non sensibles. Déploiement externe séparé ; aucune exécution automatique dans ChatGPT.",
+        "shortDescription": "CoR · Mission Studio · IA privée",
+        "longDescription": "Mission Studio prépare les contrats et DAG sans authentification. Worker IA Ollama privé exécuté uniquement sur un hôte de confiance, séparé de la passerelle HTTP publique.",
         "developerName": "Nümtema",
         "category": "Productivity",
         "defaultPrompt": [

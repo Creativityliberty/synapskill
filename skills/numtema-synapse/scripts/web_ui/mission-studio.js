@@ -1,4 +1,4 @@
-/* Mission Studio v0.5 — anonymous client-side workflow builder.
+/* Mission Studio v0.6 — anonymous client-side workflow builder.
    Calls ONLY the three public MCP planning/validation tools. No persistence, no LLM execution. */
 (() => {
   'use strict';
@@ -6,7 +6,7 @@
   if (!el('studio-generate')) return;
   const meta = {
     'io.modelcontextprotocol/protocolVersion': '2026-07-28',
-    'io.modelcontextprotocol/clientInfo': {name: 'numtema-mission-studio', version: '0.5.0'},
+    'io.modelcontextprotocol/clientInfo': {name: 'numtema-mission-studio', version: '0.6.0'},
     'io.modelcontextprotocol/clientCapabilities': {}
   };
   const PRESETS = {
@@ -45,6 +45,7 @@
   function collect() {
     const form = {
       mode: el('mission-preset').value,
+      usePrivateAI: el('mission-private-ai').checked === true,
       title: clean('mission-title', 100),
       goal: clean('mission-goal', 600),
       offer: clean('mission-offer', 140),
@@ -72,7 +73,7 @@
       context: {
         origin: 'anonymous_mission_studio', mode: form.mode, title: form.title,
         goal: form.goal, constraints: form.constraints,
-        environment: 'public_planning_only', execute: false
+        environment: 'public_planning_only', private_worker_required: form.usePrivateAI, execute: false
       },
       steps: [
         {
@@ -84,8 +85,8 @@
         },
         {
           id: 'draft', agent_id: preset.agent, depends_on: ['brief'],
-          objective: preset.draft, tool: 'local.render_template', capability: 'draft',
-          params: {values_from_task: 'brief', template: preset.template},
+          objective: preset.draft, tool: form.usePrivateAI ? 'llm.draft' : 'local.render_template', capability: 'draft',
+          params: form.usePrivateAI ? {instructions: preset.draft + '. Format JSON {\"text\": \"...\"}. Sections requises : ' + preset.fragments.join(', ') + '. Respecter le brief amont. Aucun fait inventé.'} : {values_from_task: 'brief', template: preset.template},
           expected_keys: ['text'],
           checks: {required_keys:['text'],required_text:preset.fragments}, max_revisions: 1,
           excluded_tasks: ['Publication externe', 'Exécution automatique']
@@ -218,7 +219,7 @@
       }
       lastBlueprint=blueprint;lastMission=mission;
       render(mission,plan,form);
-      status('Mission structurée et validée. Aucun agent n’a été exécuté.','success');
+      status(form.usePrivateAI ? 'Mission IA locale planifiée. Exportez le JSON pour un worker privé ; aucune IA exécutée ici.' : 'Mission structurée et validée. Aucun agent n’a été exécuté.','success');
     } catch(error) {
       status('Compilation impossible : '+error.message,'error');
     } finally {
@@ -233,6 +234,7 @@
   el('studio-export-blueprint').addEventListener('click',()=>{if(lastBlueprint)download(lastBlueprint,lastBlueprint.mission_id.toLowerCase()+'-blueprint.json');});
   el('studio-demo').addEventListener('click',()=>{
     el('mission-preset').value='landing';
+    el('mission-private-ai').checked=false;
     el('mission-title').value='Atelier conversion — exemple fictif';
     el('mission-goal').value='Structurer une page de présentation claire pour une offre fictive, sans publication.';
     el('mission-offer').value='Audit marketing découverte';
@@ -242,7 +244,7 @@
     invalidate();
     status('Exemple fictif chargé. Vous pouvez modifier le brief ou le compiler.');
   });
-  for(const id of ['mission-preset','mission-title','mission-goal','mission-offer','mission-audience','mission-benefit','mission-constraints']){
+  for(const id of ['mission-private-ai','mission-preset','mission-title','mission-goal','mission-offer','mission-audience','mission-benefit','mission-constraints']){
     el(id).addEventListener('input',invalidate);
     el(id).addEventListener('change',invalidate);
   }

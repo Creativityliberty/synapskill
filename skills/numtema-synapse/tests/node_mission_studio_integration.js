@@ -53,6 +53,22 @@ async function run(){
   el('mission-title').listeners.input();
   assert.equal(el('studio-output').hidden,true);
   assert.equal(el('studio-state').textContent,'MODIFIÉ');
-  console.log('PASS Mission Studio DOM + JSON-RPC compile/plan/validate + export + invalidation');
+  // v0.6: opt-in planning for a private LLM worker, not remote execution.
+  el('mission-title').value='Atelier IA privé — fictif';
+  el('mission-private-ai').checked=true;
+  el('mission-private-ai').listeners.change();
+  await el('studio-generate').click();
+  assert.equal(el('studio-state').textContent,'PLANNED');
+  assert.match(el('studio-message').textContent,/IA locale planifiée/);
+  await el('studio-export-blueprint').click();
+  const aiBlueprint=JSON.parse(await lastDownloaded.text());
+  assert.equal(aiBlueprint.steps[1].tool,'llm.draft');
+  await el('studio-export').click();
+  const aiCompiled=JSON.parse(await lastDownloaded.text());
+  assert.equal(aiCompiled.tasks[1].tool,'llm.draft');
+  assert(aiCompiled.tasks.every(t=>t.contract.permissions.external_write===false));
+  // Confirm no real model backend or remote execution was invoked by browser.
+  assert.equal(calls.some(x=>/execute_workflow/.test(x)),false);
+  console.log('PASS Mission Studio v0.6 DOM + JSON-RPC + private LLM blueprint export (no execution)');
 }
 run().catch(e=>{console.error(e);process.exitCode=1});

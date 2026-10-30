@@ -19,3 +19,7 @@
 @media(max-width:700px){.studio-workspace{gap:11px}.studio-heading{display:block}.studio-mode{margin-top:14px}.studio-panel-heading{padding:17px}.studio-form-fields{padding:19px 17px 5px}.studio-actions{padding:18px 17px 10px}.studio-privacy{margin:9px 17px 0}.studio-message{margin:0 17px 19px}.studio-field-row{grid-template-columns:1fr;gap:17px}.studio-output{padding:17px}.studio-bottom{align-items:flex-start;flex-direction:column}.studio-export-row button{flex:1 1 100%}.studio-empty-orbit{width:172px;height:172px}.studio-empty{min-height:320px;padding:25px}}
 
 @media(max-width:380px){.sidebar{padding-inline:8px}.nav-link{padding:0 1px}.nav-icon{width:19px;font-size:15px}.brand-text small{display:none}.brand-text strong{font-size:11px}}
+
+/* v0.6 private-LLM planning flag */
+.studio-ai-option {display:flex;flex-direction:column;gap:6px;padding:14px 16px;border:1px solid rgba(75,118,250,.25);border-radius:12px;background:rgba(27,56,112,.16)}
+.studio-ai-option > span {display:flex;align-items:center;gap:10px;font-weight:650}.studio-ai-option input[type="checkbox"]{width:18px;height:18px;accent-color:#648aff;flex:0 0 auto}.studio-ai-option small{font-size:12px;line-height:1.45;color:#a6b5d8;font-weight:400}

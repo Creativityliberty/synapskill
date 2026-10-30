@@ -3,7 +3,11 @@ name: numtema-synapse
 description: Use when a user asks to structure or execute a complex mission with Nümtema, Professor Synapse, Vortex, CoR contracts, RRLA, Reflexion, cognitive filters, meta-prompting, expert agents, agentic workflows, mission state, or /start /save /new. Also use to design, audit, improve, package or validate prompts, agents and workflows grounded in this methodology. Do not use for a simple unrelated factual question.
 ---
 
-# Nümtema Synapse Cognitive OS — skill maître v0.3
+# Nümtema Synapse Cognitive OS — skill maître v0.6.0
+
+**Évolution v0.6 (runtime IA privé)** : consulter `references/llm-runtime-v06.md` pour Ollama, le CLI `scripts/llm_runtime.py`, le modèle de tâche `llm.draft` et la séparation stricte HTTP public / worker privé. Mission Studio prépare les plans IA, mais **ne lance aucun modèle depuis le navigateur**. Le worker ne s'exécute qu'avec `--execute` et un Ollama réellement accessible ; les tests avec réponses simulées ne sont pas une preuve de génération IA réelle.
+
+**Évolution v0.4.1 (MCP HTTP public)** : consulter `references/mcp-hosted-v04.md`. La passerelle ne requiert aucune authentification : ni login, ni token, ni Bearer, ni OAuth. Elle n'expose que quatre outils non persistants de préparation et lecture ; `execute_workflow` et `recall_lessons` sont interdits à distance. **Tout internaute peut l'utiliser**, donc aucune donnée privée ni action sensible ne doit être intégrée. Le code est testé localement, non déployé sur Coolify. Ne pas confondre avec le service externe existant ou prétendre avoir vérifié son URL sans résultat réseau.
 
 **Évolution v0.3 :** lire `references/mcp-stdio-v03.md` pour le serveur MCP local qui expose six fonctions via stdio. Il supporte les clients MCP récents (2026-07-28) et le handshake historique. Par défaut, il ne peut pas exécuter de mission : `--allow-execute` doit être défini par un hôte local de confiance et n’autorise que des fonctions locales read/draft. Ne jamais annoncer un connecteur ou serveur MCP externe comme disponible avant d'en avoir vérifié le lancement dans l'environnement de l'utilisateur.
 
@@ -93,6 +97,7 @@ Reflexion ne consiste pas à réexécuter la même requête 3 fois. Enregistrer 
 - `references/examples-and-commands.md` : exemples de prompts et invocation.
 - `references/forge-runtime-v02.md` : Agent Forge compilateur, exécution de DAG, approbations, reprise et SQLite.
 - `references/mcp-stdio-v03.md` : serveur MCP local dual-era, outils accessibles et sécurité.
+- `references/mcp-hosted-v04.md` : passerelle MCP HTTP publique sans auth, restrictions des outils, déploiement Coolify staging et probe anonyme.
 
 ## Format de réponse par défaut
 

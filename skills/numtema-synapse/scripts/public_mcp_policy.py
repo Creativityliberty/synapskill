@@ -19,6 +19,12 @@ class PublicSynapseMCPServer(SynapseMCPServer):
     def __init__(self, *, max_calls_per_minute=60):
         super().__init__(allow_execute=False, state_db=None, lessons_db=None,
                          max_calls_per_minute=max_calls_per_minute)
+        # Planning-only descriptors: the registered handlers are not remotely callable.
+        # Public policy denies execute_workflow before MCP dispatch.
+        def never_execute(*args, **kwargs):
+            raise PermissionError('LLM execution is private-only')
+        self.runtime.register('llm.draft', never_execute, capability='draft', version='plan-only-v06')
+        self.runtime.register('llm.review', never_execute, capability='draft', version='plan-only-v06')
 
     def call_tool(self, name, args=None, *, modern=True):
         if name not in PUBLIC_TOOL_NAMES:
