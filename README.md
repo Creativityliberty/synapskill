@@ -46,3 +46,11 @@ La route **GET /mcp** propose une interface Nümtema responsive (desktop et mobi
 Le bouton « Tester la passerelle » réalise réellement `tools/list` et vérifie le refus des deux opérations sensibles, mais **n'exécute jamais** de workflow. Le contrôle `Origin` accepte les appels du même domaine et rejette les origines tierces non autorisées. Aucun login ou token demandé.
 
 Tests locaux : `python3 -m unittest discover -s skills/numtema-synapse/tests -q`. Une vérification locale ne remplace pas les contrôles sur le déploiement Coolify ; valider la version, les quatre outils et les refus après déploiement.
+
+## Mission Studio v0.5.0 — Préparer sans exécuter
+
+Le dashboard `GET /mcp` accueille désormais **Mission Studio** : formulaire guidé, presets conversion/cadrage/éditorial, compilation de trois contrats CoR 2.0 par `numtema.compile_blueprint`, contrôle DAG via `numtema.plan_workflow`, validation de chaque contrat via `numtema.validate_cor`, visualisation interactive et export de `mission.json` et `blueprint.json`. Les trois outils sont les appels MCP existants ; il ne s'agit pas d'une simulation visuelle.
+
+**Sans login ni jeton.** Aucun worker IA n'est lancé, aucune action externe, pas de mémoire persistante. Le formulaire soumet des données à une API publique anonyme : ne jamais saisir de secrets ou de données clients confidentielles. Les exports sont réalisés côté navigateur. Les profils des agents décrivent des rôles, pas des processus LLM autonomes.
+
+Tests : `python3 -m unittest discover -s skills/numtema-synapse/tests -q` (100 tests locaux), puis `SYNAPSE_TEST_URL=http://127.0.0.1:8000 node skills/numtema-synapse/tests/node_mission_studio_integration.js` avec serveur local démarré. Un contrôle visuel en navigateur reste nécessaire sur Coolify (environnement actuel : Chromium bloqué par la politique réseau).

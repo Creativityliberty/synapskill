@@ -4,7 +4,7 @@
   const base = location.origin;
   const meta = {
     'io.modelcontextprotocol/protocolVersion': '2026-07-28',
-    'io.modelcontextprotocol/clientInfo': { name: 'synapse-public-dashboard', version: '0.4.2' },
+    'io.modelcontextprotocol/clientInfo': { name: 'synapse-public-dashboard', version: '0.5.0' },
     'io.modelcontextprotocol/clientCapabilities': {}
   };
   const publicNames = new Set([

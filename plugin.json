@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "numtema-synapse-cognitive-os",
-  "version": "0.4.2",
-  "description": "Nümtema Synapse Cognitive OS : CoR, RRLA, Reflexion et Agent Forge ; passerelle MCP publique anonyme et dashboard premium.",
+  "version": "0.5.0",
+  "description": "Nümtema Synapse Cognitive OS : Mission Studio CoR, planification DAG, Agent Forge et passerelle MCP publique anonyme (4 outils, sans exécution distante).",
   "author": {
     "name": "Nümtema"
   },

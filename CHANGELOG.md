@@ -1,3 +1,8 @@
+## v0.5.0 — Mission Studio (30 octobre 2026)
+- Création de mission guidée, contrats CoR compilés et validés, DAG vérifié et exports JSON sans exécution distante.
+- Extension du dashboard existant, trois presets, interface responsive, tests API/DOM et intégration Node.
+- Aucune authentification, aucune connexion à un LLM, aucune donnée conservée côté serveur.
+
 # Versions
 
 ## 0.3.0 — Serveur MCP stdio local dual-era
