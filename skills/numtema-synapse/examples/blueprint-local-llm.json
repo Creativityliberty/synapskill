@@ -1,0 +1,51 @@
+{
+  "mission_id": "NUM-LOCAL-LLM-DEMO",
+  "context": {
+    "project": "Exemple fictif — Audit marketing découverte",
+    "audience": "Entrepreneurs et PME",
+    "goal": "Rédiger une première proposition de valeur, sans publication",
+    "trust_level": "sandbox_local_only"
+  },
+  "steps": [
+    {
+      "id": "brief",
+      "agent_id": "FocusAgent",
+      "objective": "Structurer le brief fictif",
+      "tool": "local.extract_fields",
+      "capability": "read",
+      "params": {
+        "data": {"offer": "Audit marketing découverte", "audience": "Entrepreneurs et PME", "benefit": "Identifier trois priorités concrètes"},
+        "fields": ["offer", "audience", "benefit"]
+      },
+      "expected_keys": ["offer", "audience", "benefit"],
+      "checks": {"required_keys": ["offer", "audience", "benefit"]},
+      "max_revisions": 0
+    },
+    {
+      "id": "draft",
+      "agent_id": "Rhetorica",
+      "objective": "Rédiger un premier brouillon vérifiable de landing page",
+      "tool": "llm.draft",
+      "capability": "draft",
+      "depends_on": ["brief"],
+      "params": {
+        "instructions": "Rédiger dans une seule valeur JSON text avec les trois sections exactes HERO, BÉNÉFICE, CTA. Utiliser le brief amont. Ne pas inventer de témoignages, statistiques ou résultats."
+      },
+      "expected_keys": ["text"],
+      "checks": {"required_keys": ["text"], "required_text": ["HERO", "BÉNÉFICE", "CTA"]},
+      "max_revisions": 1
+    },
+    {
+      "id": "review",
+      "agent_id": "VerifierAgent",
+      "objective": "Contrôler de façon déterministe les sections exigées",
+      "tool": "local.assert_contains",
+      "capability": "read",
+      "depends_on": ["draft"],
+      "params": {"source_task": "draft", "fragments": ["HERO", "BÉNÉFICE", "CTA"]},
+      "expected_keys": ["passed", "evidence"],
+      "checks": {"required_keys": ["passed", "evidence"], "require_passed": true},
+      "max_revisions": 0
+    }
+  ]
+}

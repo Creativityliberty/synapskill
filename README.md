@@ -54,3 +54,19 @@ Le dashboard `GET /mcp` accueille désormais **Mission Studio** : formulaire gui
 **Sans login ni jeton.** Aucun worker IA n'est lancé, aucune action externe, pas de mémoire persistante. Le formulaire soumet des données à une API publique anonyme : ne jamais saisir de secrets ou de données clients confidentielles. Les exports sont réalisés côté navigateur. Les profils des agents décrivent des rôles, pas des processus LLM autonomes.
 
 Tests : `python3 -m unittest discover -s skills/numtema-synapse/tests -q` (100 tests locaux), puis `SYNAPSE_TEST_URL=http://127.0.0.1:8000 node skills/numtema-synapse/tests/node_mission_studio_integration.js` avec serveur local démarré. Un contrôle visuel en navigateur reste nécessaire sur Coolify (environnement actuel : Chromium bloqué par la politique réseau).
+
+## v0.6.0 — Agent Runtime IA privé, sans authentification du Studio
+
+Mission Studio peut maintenant compiler un blueprint **à destination d'Ollama** via l'option « Préparer pour un agent IA local ». L'API publique n'exécute aucun modèle : elle accepte la **planification** `llm.draft`, mais refuse toujours les invocations d'exécution et d'accès SQLite.
+
+Le worker privé `skills/numtema-synapse/scripts/llm_runtime.py` utilise réellement `POST /api/chat` lorsque l'opérateur lance la commande locale avec `--execute` et qu'Ollama est disponible. Les appels et révisions sont bornés ; aucun stockage persistant ni action externe par le modèle. Une mission terminée est **structurellement** validée, pas factuellement certifiée.
+
+```bash
+python3 skills/numtema-synapse/scripts/llm_runtime.py \
+  skills/numtema-synapse/examples/blueprint-local-llm.json --model gemma3:1b
+# Dry-run PLANNED. Après installation et démarrage d'Ollama :
+python3 skills/numtema-synapse/scripts/llm_runtime.py \
+  skills/numtema-synapse/examples/blueprint-local-llm.json --model gemma3:1b --execute
+```
+
+**Le worker ne doit jamais être relié à un endpoint HTTP public sans authentification.** Il s'exécute depuis une machine ou un réseau de confiance, hors de la passerelle actuelle Coolify. Voir [le guide du runtime](skills/numtema-synapse/references/llm-runtime-v06.md). Les tests de bout en bout utilisent un serveur Ollama simulé, pas un modèle installé ; valider localement avec un vrai modèle avant tout usage réel.

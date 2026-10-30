@@ -1,3 +1,8 @@
+## v0.6.0 — 2026-10-30
+- Worker privé Ollama opt-in, contrats CoR et appels IA bornés avec feedback et contrôles déterministes.
+- Mission Studio peut planifier un blueprint `llm.draft` sans exécution ni authentification publique.
+- 114 tests locaux réussis (dont CLI + serveur Ollama simulé), test avec modèle installé encore requis.
+
 ## v0.5.0 — Mission Studio (30 octobre 2026)
 - Création de mission guidée, contrats CoR compilés et validés, DAG vérifié et exports JSON sans exécution distante.
 - Extension du dashboard existant, trois presets, interface responsive, tests API/DOM et intégration Node.
