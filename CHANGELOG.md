@@ -1,3 +1,10 @@
+## 0.7.0 — 2026-10-30
+- Double validation opt-in du worker privé : contrôles CoR déterministes puis verdict JSON LLM strict.
+- Reviewer distinct, modèle distinct facultatif, relecture et feedback réinjectés avec budget borné.
+- Échec fermé sur verdict erroné ou contradictoire, empreinte des sorties et journal de revue non persistant.
+- Surface HTTP/SSE publique inchangée, 4 outils sans authentification, aucune exécution.
+- 123 tests locaux réussis ; serveur Ollama simulé, vrai modèle non vérifié.
+
 ## v0.6.0 — 2026-10-30
 - Worker privé Ollama opt-in, contrats CoR et appels IA bornés avec feedback et contrôles déterministes.
 - Mission Studio peut planifier un blueprint `llm.draft` sans exécution ni authentification publique.

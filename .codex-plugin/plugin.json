@@ -1,8 +1,8 @@
 {
   "interface": {
     "displayName": "N\u00fcmtema Synapse Cognitive OS",
-    "shortDescription": "CoR \u00b7 Mission Studio \u00b7 IA priv\u00e9e",
-    "longDescription": "Mission Studio pr\u00e9pare les contrats et DAG sans authentification. Worker IA Ollama priv\u00e9 ex\u00e9cut\u00e9 uniquement sur un h\u00f4te de confiance, s\u00e9par\u00e9 de la passerelle HTTP publique.",
+    "shortDescription": "CoR \u00b7 Mission Studio \u00b7 Reflexion",
+    "longDescription": "Contrats CoR et DAG publics sans compte ; worker IA Ollama priv\u00e9 opt-in, contr\u00f4le structurel puis r\u00e9vision Reflexion s\u00e9par\u00e9e. Aucun acc\u00e8s public \u00e0 l\u2019ex\u00e9cution IA.",
     "developerName": "N\u00fcmtema",
     "category": "Productivity",
     "defaultPrompt": [
@@ -14,8 +14,8 @@
     "capabilities": []
   },
   "name": "numtema-synapse-cognitive-os",
-  "version": "0.6.0",
-  "description": "Synapse Cognitive OS : Mission Studio CoR, DAG, agent IA Ollama priv\u00e9 opt-in, MCP public anonyme \u00e0 quatre outils sans ex\u00e9cution distante.",
+  "version": "0.7.0",
+  "description": "Synapse Cognitive OS : CoR/DAG, Mission Studio public anonyme, Ollama priv\u00e9 avec Reflexion v0.7 en double validation heuristique.",
   "author": {
     "name": "N\u00fcmtema"
   },

@@ -70,3 +70,18 @@ python3 skills/numtema-synapse/scripts/llm_runtime.py \
 ```
 
 **Le worker ne doit jamais être relié à un endpoint HTTP public sans authentification.** Il s'exécute depuis une machine ou un réseau de confiance, hors de la passerelle actuelle Coolify. Voir [le guide du runtime](skills/numtema-synapse/references/llm-runtime-v06.md). Les tests de bout en bout utilisent un serveur Ollama simulé, pas un modèle installé ; valider localement avec un vrai modèle avant tout usage réel.
+
+## Reflexion Engine v0.7.0 — Validation heuristique privée
+
+Le worker Ollama accepte `--reflexion` pour soumettre chaque brouillon à une **double validation** : les contrôles structurels CoR, puis une revue LLM séparée (`--reviewer-model` facultatif, pour choisir un autre modèle local). En cas de rejet, les défauts sont réinjectés dans une révision bornée. Le reçu contient l'empreinte SHA-256 du candidat et le verdict, jamais le brouillon complet.
+
+```bash
+# Planification : aucun modèle sollicité
+python3 skills/numtema-synapse/scripts/llm_runtime.py skills/numtema-synapse/examples/blueprint-local-llm.json --model gemma3:1b --reflexion
+# Sur un hôte privé où Ollama et le(s) modèle(s) sont réellement installés :
+python3 skills/numtema-synapse/scripts/llm_runtime.py skills/numtema-synapse/examples/blueprint-local-llm.json --model gemma3:1b --reflexion --execute
+```
+
+**L'évaluation est heuristique, jamais une vérification factuelle ou une garantie de conformité.** Un reviewer malformé refuse la validation. Le mode sans `--reflexion` conserve le comportement v0.6. Le serveur public anonyme reste limité aux quatre outils planificateurs, sans worker ni lecture SQLite. Voir [la documentation Reflexion](skills/numtema-synapse/references/reflexion-v07.md).
+
+**Preuves disponibles :** 123 tests Python locaux, plus test CLI HTTP contre simulateur Ollama ; aucun modèle Ollama réel n'était accessible dans cette session. Validation de production et de vrai modèle encore requise.
