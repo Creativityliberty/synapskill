@@ -1,52 +1,40 @@
-# Nümtema Synapse Cognitive OS — v0.3.0
+# Nümtema Synapse Cognitive OS — Public MCP v0.4.1
 
-**Skill + plugin privé + serveur MCP stdio local** pour orchestrer des missions CoR gouvernées par RRLA, Synapse, Reflexion, Morphius et Agent Forge. Propriété Nümtema (voir `LICENSE.md`).
+**Serveur MCP anonyme** pour préparation et validation de workflows CoR, RRLA, Reflexion et Agent Forge. Code source public ; les ressources privées du plugin ChatGPT ne sont pas publiées ici.
 
-## Ce qui est réellement exécutable
+## API publique sans authentification
 
-- `scripts/agent_forge.py` : compilation d'un blueprint en contrats CoR 2.0 et DAG.
-- `scripts/forge_runtime.py` : moteur local de DAG, contrôles déterministes, corrections bornées, reprise SQLite optionnelle et approbations host-only pour adaptateurs sensibles.
-- `scripts/mcp_server.py` : serveur stdio MCP **réel**, sans dépendance Python externe, avec six outils : liste d'agents, validation CoR, compilation, planification, exécution locale opt-in et lecture opt-in des leçons.
-- Compatibilité JSON-RPC testée pour le protocole MCP `2026-07-28` (nouveau `server/discover`) et les initialisations héritées `2025-11-25`, `2025-06-18`, `2025-03-26`.
+- `GET /mcp` : page de présentation limitée aux **4 outils publics**.
+- `POST /mcp`, `POST /jsonrpc` : JSON-RPC MCP HTTP.
+- `GET /sse` puis `POST /messages?session_id=...` : transport SSE historique conservé.
+- `GET /health` : santé et indication `execution_allowed: false`.
 
-## Démarrage rapide (Python 3.11+)
+Outils acceptés : `numtema.list_agents`, `numtema.validate_cor`, `numtema.compile_blueprint`, `numtema.plan_workflow`.
 
-Depuis le dossier de ce ZIP après extraction :
+**Interdits sur TOUS les transports publics :** `numtema.execute_workflow`, `numtema.recall_lessons`, toute écriture sur une base SQLite, les accès aux comptes et les opérations externes. Les identifiants, jetons et faux en-têtes client ne créent aucune permission. Le serveur local `mcp_server.py` garde ses six outils dans un environnement de confiance, distinct du serveur HTTP public.
+
+## Exécuter localement
 
 ```bash
+python3 -m pip install -r requirements.txt
 python3 -m unittest discover -s skills/numtema-synapse/tests -v
-python3 skills/numtema-synapse/scripts/mcp_server.py < skills/numtema-synapse/examples/mcp-protocol-demo.jsonl
+docker compose up --build -d
+curl http://127.0.0.1:8000/health
 ```
 
-Les commandes ci-dessus vérifient la suite et affichent trois réponses MCP sans exécuter de mission.
+`Dockerfile` lance `mcp_http_server.py`. Dans Compose, le port est lié à `127.0.0.1` pour éviter d'exposer directement le HTTP non chiffré. Pour Coolify, configurer un domaine HTTPS pointant vers le port interne 8000 et redéployer volontairement la révision voulue.
 
-Pour qu'un **hôte MCP stdio local** le lance, utiliser la configuration proposée dans `skills/numtema-synapse/examples/mcp-host-config.example.json` après adaptation du chemin absolu. Par défaut, la commande de lancement est :
+## Sécurité et limites
 
-```bash
-python3 skills/numtema-synapse/scripts/mcp_server.py
-```
+- Aucune authentification utilisateur, aucun mot de passe, aucun Bearer, aucun OAuth.
+- Les en-têtes `Origin` sont rejetés par défaut. Pour autoriser un navigateur sur un domaine de confiance, configurer `SYNAPSE_ALLOWED_ORIGINS=https://exemple.fr` (origines HTTPS exactes, séparées par des virgules).
+- Taille maximale de requête : 1 Mo ; 32 connexions SSE simultanées ; 16 réponses en file par session ; 60 appels/minute par processus par défaut. Mettre aussi un plafond de débit au reverse proxy : les limites applicatives ne remplacent pas une protection réseau.
+- **Service public : ne jamais envoyer de secrets ou de données client confidentielles.** L'absence d'authentification interdit d'isoler correctement des locataires.
+- Les variables historiques `SYNAPSE_ALLOW_EXECUTE`, `SYNAPSE_STATE_DB` et `SYNAPSE_LESSONS_DB` n'activent rien dans le serveur HTTP public.
+- Les tests locaux ne prouvent pas que Coolify a déjà redéployé ni que chaque client MCP externe est compatible.
 
-Autoriser les **adaptateurs locaux uniquement** :
+## Vérification avant production
 
-```bash
-python3 skills/numtema-synapse/scripts/mcp_server.py --allow-execute
-```
+Contrôler la liste exacte des quatre outils depuis `/mcp` et via SSE ; tenter des appels à `execute_workflow` et `recall_lessons` et obtenir un refus ; vérifier l'accès anonyme, l'origine rejetée, le volume des requêtes et les journaux proxy. Ne pas redéployer automatiquement depuis cette PR sans validation de l'instance Coolify existante.
 
-Exécution reproductible hors MCP :
-
-```bash
-python3 skills/numtema-synapse/scripts/agent_forge.py skills/numtema-synapse/examples/blueprint-landing-page.json --output /tmp/numtema-mission.json
-python3 skills/numtema-synapse/scripts/forge_runtime.py /tmp/numtema-mission.json --execute
-```
-
-## Sécurité et confidentialité
-
-L'exécution MCP est désactivée sans `--allow-execute`. Même activée, seuls quatre adaptateurs locaux de lecture/rédaction existent : `local.echo`, `local.extract_fields`, `local.render_template` et `local.assert_contains`. Aucun shell, HTTP, publication, publicité ou paiement n'est disponible ; les autorisations sensibles ne peuvent pas être forgées par les paramètres de mission. Aucune clé et aucun compte client ne figurent dans le ZIP. La mémoire persistante est **désactivée par défaut** : `--state-db` pour les reçus locaux, `--lessons-db` pour lire des leçons SQLite. Contrôler la rétention et les accès aux fichiers si ces options sont utilisées.
-
-Les tests unitaires, d'intégration et transport **ne constituent pas une certification MCP officielle ni une validation par un client MCP externe**.
-
-## Utilisation dans ChatGPT
-
-Le plugin privé fournit son skill et les fichiers sources. **L'ajout du plugin ne lance pas son serveur Python local, ne connecte aucun compte et ne crée pas un endpoint MCP hébergé.** Le serveur fonctionne uniquement lorsqu'un hôte compatible le démarre explicitement. Le mode conversationnel du skill reste utilisable dans ChatGPT sans le runtime.
-
-Documentation détaillée : `skills/numtema-synapse/references/mcp-stdio-v03.md`.
+Voir `skills/numtema-synapse/SKILL.md` et les références pour l'architecture cognitive générale.
