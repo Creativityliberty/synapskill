@@ -1,12 +1,8 @@
 #!/usr/bin/env python3
-"""HTTP / SSE server wrapper for Nümtema Synapse MCP.
+"""Nümtema Synapse HTTP/SSE transport: intentionally anonymous, four-tool public facade.
 
-Exposes:
-- GET / and GET /health : Status and diagnostic JSON
-- GET /mcp : Browser-friendly info page showing server status and tools
-- POST /mcp & POST /jsonrpc : Standard MCP JSON-RPC 2.0 endpoint
-- GET /sse : Server-Sent Events stream for remote MCP SSE clients (Claude, Cursor, etc.)
-- POST /messages : Inbound messages endpoint for SSE sessions
+Both POST /mcp and legacy GET /sse + POST /messages share PublicSynapseMCPServer.
+The more capable six-tool stdio server is NOT exposed over the network.
 """
 from __future__ import annotations
 
@@ -16,184 +12,159 @@ import os
 import sys
 import uuid
 from pathlib import Path
-from typing import Dict
+from urllib.parse import urlsplit
 
-# Add scripts directory to path
+from fastapi import FastAPI, Request, Response
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+
 SCRIPTS_DIR = Path(__file__).resolve().parent
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
-from fastapi import FastAPI, Request, Response, status
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+from mcp_server import (SERVER_NAME, MAX_MESSAGE_BYTES, SERVER_VERSION as MCP_VERSION,
+                        TOOLS, parse_message)
+from public_mcp_policy import PublicSynapseMCPServer, PUBLIC_TOOL_NAMES
 
-from mcp_server import SynapseMCPServer, parse_message, SERVER_NAME, SERVER_VERSION, TOOLS
-
-# Configuration via environment variables
-ALLOW_EXECUTE = os.getenv("SYNAPSE_ALLOW_EXECUTE", "true").lower() in ("1", "true", "yes")
-STATE_DB = Path(os.getenv("SYNAPSE_STATE_DB", "state/receipts.sqlite")) if os.getenv("SYNAPSE_STATE_DB") else None
-LESSONS_DB = Path(os.getenv("SYNAPSE_LESSONS_DB", "state/lessons.sqlite")) if os.getenv("SYNAPSE_LESSONS_DB") else None
-MAX_CALLS = int(os.getenv("SYNAPSE_MAX_CALLS_PER_MIN", "300"))
-
-# Ensure state directory exists if sqlite db is used
-if STATE_DB and STATE_DB.parent:
-    STATE_DB.parent.mkdir(parents=True, exist_ok=True)
-if LESSONS_DB and LESSONS_DB.parent:
-    LESSONS_DB.parent.mkdir(parents=True, exist_ok=True)
-
-mcp_engine = SynapseMCPServer(
-    allow_execute=ALLOW_EXECUTE,
-    state_db=STATE_DB,
-    lessons_db=LESSONS_DB,
-    max_calls_per_minute=MAX_CALLS
-)
-
-app = FastAPI(
-    title="Nümtema Synapse MCP Server",
-    description="HTTP endpoint for Synapse Cognitive OS MCP tools",
-    version=SERVER_VERSION
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Registry of active SSE client queues
-sse_clients: Dict[str, asyncio.Queue] = {}
+MAX_CALLS = min(max(int(os.getenv('SYNAPSE_MAX_CALLS_PER_MIN', '60')), 1), 1000)
+MAX_SSE_CLIENTS = 32
 
 
-@app.get("/")
-@app.get("/health")
+def _allowed_origins():
+    origins = [o.strip() for o in os.getenv('SYNAPSE_ALLOWED_ORIGINS', '').split(',') if o.strip()]
+    for origin in origins:
+        parsed = urlsplit(origin)
+        if parsed.scheme != 'https' or not parsed.hostname or parsed.username or parsed.password or parsed.path or parsed.query or parsed.fragment:
+            raise ValueError('SYNAPSE_ALLOWED_ORIGINS requires exact HTTPS origins')
+    return tuple(origins)
+
+
+ALLOWED_ORIGINS = _allowed_origins()
+mcp_engine = PublicSynapseMCPServer(max_calls_per_minute=MAX_CALLS)
+app = FastAPI(title='Nümtema Synapse MCP PUBLIC', version='0.4.1',
+              description='Anonymous planning and validation tools only')
+app.add_middleware(CORSMiddleware, allow_origins=list(ALLOWED_ORIGINS),
+                   allow_credentials=False, allow_methods=['GET', 'POST'],
+                   allow_headers=['Content-Type', 'Accept', 'MCP-Protocol-Version', 'Mcp-Method', 'Mcp-Name'])
+
+# Session identifiers are transport handles, NOT authentication or a grant of permission.
+sse_clients: dict[str, asyncio.Queue] = {}
+
+
+@app.middleware('http')
+async def security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers['Cache-Control'] = 'no-store'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['Referrer-Policy'] = 'no-referrer'
+    return response
+
+
+def _origin_denied(request: Request) -> bool:
+    origin = request.headers.get('origin')
+    return origin is not None and origin not in ALLOWED_ORIGINS
+
+
+async def _read_limited(request: Request) -> bytes | None:
+    """Limit consumed body, including when Content-Length is missing or forged."""
+    try:
+        stated = int(request.headers.get('content-length', '0'))
+    except ValueError:
+        return None
+    if stated > MAX_MESSAGE_BYTES or stated < 0:
+        return None
+    chunks = []
+    length = 0
+    async for chunk in request.stream():
+        length += len(chunk)
+        if length > MAX_MESSAGE_BYTES:
+            return None
+        chunks.append(chunk)
+    return b''.join(chunks)
+
+
+@app.get('/')
+@app.get('/health')
 async def health_check():
-    return {
-        "status": "healthy",
-        "server": SERVER_NAME,
-        "version": SERVER_VERSION,
-        "execution_allowed": ALLOW_EXECUTE,
-        "transport": ["http_post", "sse"],
-        "endpoints": {
-            "mcp_post": "/mcp",
-            "mcp_sse": "/sse",
-            "messages": "/messages",
-            "health": "/health"
-        }
-    }
+    return {'status': 'healthy', 'server': SERVER_NAME, 'version': '0.4.1',
+            'execution_allowed': False, 'public_tools': len(PUBLIC_TOOL_NAMES),
+            'transport': ['http_post', 'sse'],
+            'endpoints': {'mcp_post': '/mcp', 'mcp_sse': '/sse', 'messages': '/messages', 'health': '/health'}}
 
 
-@app.get("/mcp")
+@app.get('/mcp')
 async def mcp_browser_view():
-    """Browser landing page when someone visits /mcp via GET."""
-    tools_html = "".join(
-        f"<li><strong>{t['name']}</strong> ({t['title']})<br><small style='color:#666;'>{t['description']}</small></li>"
-        for t in TOOLS
-    )
-    html_content = f"""
-    <!DOCTYPE html>
-    <html lang="fr">
-    <head>
-        <meta charset="utf-8">
-        <title>{SERVER_NAME}</title>
-        <style>
-            body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 750px; margin: 40px auto; padding: 20px; line-height: 1.6; background: #0b0f19; color: #f1f5f9; }}
-            .card {{ background: #161e2e; border: 1px solid #2d3748; border-radius: 10px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.5); }}
-            h1 {{ margin-top: 0; color: #38bdf8; }}
-            .badge {{ display: inline-block; padding: 4px 10px; border-radius: 9999px; font-size: 12px; font-weight: bold; background: #059669; color: white; }}
-            ul {{ padding-left: 20px; }}
-            li {{ margin-bottom: 12px; }}
-            code {{ background: #0f172a; padding: 3px 6px; border-radius: 4px; font-size: 13px; color: #f43f5e; }}
-        </style>
-    </head>
-    <body>
-        <div class="card">
-            <span class="badge">EN LIGNE & OPÉRATIONNEL</span>
-            <h1>{SERVER_NAME} v{SERVER_VERSION}</h1>
-            <p>Ce serveur MCP est opérationnel et prêt à recevoir des requêtes JSON-RPC 2.0.</p>
-            <p><strong>Note :</strong> Dans un navigateur web, la page s'affiche en <code>GET</code>. Les clients MCP (Claude Desktop, Cursor, n8n, etc.) envoient des requêtes <code>POST</code>.</p>
-        </div>
-        <div class="card">
-            <h3>Configuration client MCP :</h3>
-            <p><strong>URL SSE :</strong> <code>https://synapse.coolify.dallico.com/sse</code></p>
-            <p><strong>URL HTTP POST directe :</strong> <code>https://synapse.coolify.dallico.com/mcp</code></p>
-        </div>
-        <div class="card">
-            <h3>Outils disponibles ({len(TOOLS)}) :</h3>
-            <ul>{tools_html}</ul>
-        </div>
-    </body>
-    </html>
-    """
-    return HTMLResponse(content=html_content)
+    """Keep the existing browser-friendly GET route without exposing private tools."""
+    items = ''.join(f'<li><code>{t["name"]}</code></li>' for t in TOOLS if t['name'] in PUBLIC_TOOL_NAMES)
+    return HTMLResponse('<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8">'
+                        '<title>Nümtema Synapse MCP</title></head><body>'
+                        '<h1>Nümtema Synapse Cognitive OS v0.4.1</h1>'
+                        '<p>Passerelle publique anonyme : préparation et validation uniquement.</p>'
+                        '<p>POST /mcp · GET /sse · POST /messages</p>'
+                        f'<p>Outils publics ({len(PUBLIC_TOOL_NAMES)}) :</p><ul>{items}</ul></body></html>')
 
 
-@app.post("/mcp")
-@app.post("/jsonrpc")
+@app.post('/mcp')
+@app.post('/jsonrpc')
 async def handle_mcp_post(request: Request):
-    """MCP JSON-RPC 2.0 direct HTTP POST endpoint."""
-    body = await request.body()
+    if _origin_denied(request):
+        return JSONResponse({'error': 'Origin not allowed'}, status_code=403)
+    body = await _read_limited(request)
+    if body is None:
+        return JSONResponse({'error': 'Request exceeds size limit or invalid Content-Length'}, status_code=413)
     result = parse_message(body, mcp_engine)
     if result is None:
-        return Response(status_code=status.HTTP_204_NO_CONTENT)
+        return Response(status_code=204)
     return JSONResponse(content=result)
 
 
-# --- MCP Server-Sent Events (SSE) Transport ---
-
-@app.get("/sse")
+@app.get('/sse')
 async def sse_endpoint(request: Request):
-    """SSE transport endpoint for MCP clients like Claude Desktop / Cursor."""
+    if _origin_denied(request):
+        return JSONResponse({'error': 'Origin not allowed'}, status_code=403)
+    if len(sse_clients) >= MAX_SSE_CLIENTS:
+        return JSONResponse({'error': 'Too many SSE clients'}, status_code=429)
     session_id = str(uuid.uuid4())
-    queue: asyncio.Queue = asyncio.Queue()
+    queue: asyncio.Queue = asyncio.Queue(maxsize=16)
     sse_clients[session_id] = queue
 
     async def event_generator():
-        # First send the endpoint event with the URI where client must send POST messages
-        endpoint_uri = f"/messages?session_id={session_id}"
-        yield f"event: endpoint\ndata: {endpoint_uri}\n\n"
+        yield f'event: endpoint\ndata: /messages?session_id={session_id}\n\n'
         try:
             while True:
                 if await request.is_disconnected():
                     break
                 try:
                     data = await asyncio.wait_for(queue.get(), timeout=20.0)
-                    yield f"event: message\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
+                    yield f'event: message\ndata: {json.dumps(data, ensure_ascii=False)}\n\n'
                 except asyncio.TimeoutError:
-                    # Keep-alive comment
-                    yield ": keepalive\n\n"
+                    yield ': keepalive\n\n'
         finally:
             sse_clients.pop(session_id, None)
 
-    return StreamingResponse(
-        event_generator(),
-        media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "X-Accel-Buffering": "no"
-        }
-    )
+    return StreamingResponse(event_generator(), media_type='text/event-stream',
+                             headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
 
 
-@app.post("/messages")
+@app.post('/messages')
 async def handle_sse_messages(request: Request, session_id: str):
-    """Client POST endpoint for sending messages to an active SSE session."""
+    if _origin_denied(request):
+        return JSONResponse({'error': 'Origin not allowed'}, status_code=403)
     queue = sse_clients.get(session_id)
-    if not queue:
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"error": "Session not found or expired"}
-        )
-    body = await request.body()
+    if queue is None:
+        return JSONResponse({'error': 'Session not found or expired'}, status_code=404)
+    body = await _read_limited(request)
+    if body is None:
+        return JSONResponse({'error': 'Request exceeds size limit or invalid Content-Length'}, status_code=413)
     result = parse_message(body, mcp_engine)
     if result is not None:
+        if queue.full():
+            return JSONResponse({'error': 'SSE queue limit reached'}, status_code=429)
         await queue.put(result)
-    return Response(status_code=status.HTTP_202_ACCEPTED)
+    return Response(status_code=202)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     import uvicorn
-    port = int(os.getenv("PORT", "8000"))
-    uvicorn.run("mcp_http_server:app", host="0.0.0.0", port=port, reload=False)
+    port = int(os.getenv('PORT', '8000'))
+    uvicorn.run(app, host='0.0.0.0', port=port, reload=False)
