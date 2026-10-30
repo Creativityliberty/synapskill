@@ -1,19 +1,50 @@
+## v0.8.0 — Cognitive Memory privée (30 octobre 2026)
+- Leçons compactes à preuve SHA-256 cohérente avec un rapport Reflexion, créées uniquement après validation explicite d'un opérateur.
+- SQLite privé `0600`, lecture seule pour le worker, scope exact, expiration 1–365 jours, suppression unitaire / par projet / expirées.
+- CLI opérateur séparée de la passerelle MCP publique ; aucune fonction de mémoire exposée au navigateur.
+- Tests de sécurité et de régression : 135 tests Python réussis ; vrai modèle Ollama non testé.
+
 ## 0.7.0 — 2026-10-30
-- Double validation opt-in du worker privé : contrôles CoR déterministes puis verdict JSON LLM strict.
-- Reviewer distinct, modèle distinct facultatif, relecture et feedback réinjectés avec budget borné.
-- Échec fermé sur verdict erroné ou contradictoire, empreinte des sorties et journal de revue non persistant.
-- Surface HTTP/SSE publique inchangée, 4 outils sans authentification, aucune exécution.
-- 123 tests locaux réussis ; serveur Ollama simulé, vrai modèle non vérifié.
+- Ajout de `reflexion_engine.py` : validateur strict de verdict critique, échec fermé et empreintes de candidats.
+- Ajout des options CLI privées `--reflexion` et `--reviewer-model` pour activer une critique distincte, après les tests CoR déterministes et avant acceptation.
+- Les défauts et suggestions sont réellement réinjectés dans la nouvelle tentative, avec budget d’appels et limites de révision.
+- Aucun nouveau outil MCP public, aucun login, aucune exécution via HTTP/SSE, aucun stockage nouveau.
+- Vérification locale avec serveur Ollama simulé ; test réel sur l’hôte Ollama restant nécessaire.
 
-## v0.6.0 — 2026-10-30
-- Worker privé Ollama opt-in, contrats CoR et appels IA bornés avec feedback et contrôles déterministes.
-- Mission Studio peut planifier un blueprint `llm.draft` sans exécution ni authentification publique.
-- 114 tests locaux réussis (dont CLI + serveur Ollama simulé), test avec modèle installé encore requis.
+## 0.6.0 — 2026-10-30
+- Introduit le worker privé `llm_runtime.py` : adaptateur Ollama via JSON POST `/api/chat`, sorties JSON structurées, budget par mission, vérification CoR, feedback Reflexion borné.
+- Planification des tâches `llm.draft`/`llm.review` côté API publique sans les rendre exécutables ; maintient les 4 outils MCP publics et l'absence d'authentification.
+- Option Studio « Préparer pour un agent IA local », blueprint exportable ; aucune exécution depuis le navigateur.
+- Ajoute une mission fictive, un guide d'exploitation privé, des tests de protocole sur serveur local simulé. Pas de véritable modèle Ollama disponible dans l'environnement de test.
 
-## v0.5.0 — Mission Studio (30 octobre 2026)
-- Création de mission guidée, contrats CoR compilés et validés, DAG vérifié et exports JSON sans exécution distante.
-- Extension du dashboard existant, trois presets, interface responsive, tests API/DOM et intégration Node.
-- Aucune authentification, aucune connexion à un LLM, aucune donnée conservée côté serveur.
+# Changelog
+
+## v0.5.0 — Mission Studio public et planification (30 octobre 2026)
+- Atelier guidé intégré au dashboard : briefs et presets, contrats CoR compilés, DAG visualisé, validation structurelle et export JSON.
+- Utilise les trois outils MCP publics existants, sans aucun nouvel endpoint, aucune exécution ni mémoire serveur.
+- Trois modèles non-IA : conversion, cadrage, éditorial. Les agents restent des rôles conceptuels.
+- UI responsive sans CDN, sortie utilisateur affichée via textContent pour éviter l'injection HTML.
+- Tests API/DOM et régression des garde-fous réseau.
+
+## 0.4.2 - Premium public MCP dashboard
+
+Responsive HTML/CSS/JS, same-origin diagnostics, 4-tool public policy, no authentication, no remote execute/lessons. Tests: 73 local. No hosted validation implied.
+
+
+## v0.4.1 — Accès MCP public sans authentification (30 octobre 2026)
+- Retrait complet du jeton Bearer et de la configuration de secrets sur la passerelle HTTP publique.
+- Maintien d’une allowlist de quatre outils de préparation et des interdictions d’exécution/SQLite.
+- Rate limit global réduit à 30 appels/minute/processus ; délai de socket borné.
+- Nouveau probe anonyme et tests HTTP qui valident l’accès sans token et le refus des outils sensibles.
+- Candidat local seulement : aucun changement effectué sur le serveur Coolify existant.
+
+## v0.4.0 — Candidat HTTP sécurisé (30 octobre 2026)
+- Passerelle MCP `POST /mcp` moderne avec Bearer via variable d'environnement (token obligatoire).
+- Validation stricte des headers MCP, de la métadonnée de version et de l'en-tête `Origin` ; gestion des erreurs et limites de taille.
+- Exposition réseau limitée à quatre outils read/draft ; `execute_workflow` et `recall_lessons` interdits à distance.
+- Dockerfile de staging Coolify, exemple de secret, documentation de proxy TLS et probe distant en lecture seule.
+- Tests de sécurité et véritables appels HTTP locaux ajoutés : 75 tests au total.
+- **Aucun déploiement sur le domaine existant, aucune bascule `/sse`, aucun OAuth ni isolation multiclient**.
 
 # Versions
 

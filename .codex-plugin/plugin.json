@@ -1,8 +1,8 @@
 {
   "interface": {
     "displayName": "N\u00fcmtema Synapse Cognitive OS",
-    "shortDescription": "CoR \u00b7 Mission Studio \u00b7 Reflexion",
-    "longDescription": "Contrats CoR et DAG publics sans compte ; worker IA Ollama priv\u00e9 opt-in, contr\u00f4le structurel puis r\u00e9vision Reflexion s\u00e9par\u00e9e. Aucun acc\u00e8s public \u00e0 l\u2019ex\u00e9cution IA.",
+    "shortDescription": "CoR \u00b7 Mission Studio \u00b7 Cognitive Memory",
+    "longDescription": "Contrats CoR et DAG publics sans compte ; worker IA Ollama priv\u00e9, Reflexion et le\u00e7ons SQLite approuv\u00e9es, limit\u00e9es \u00e0 un p\u00e9rim\u00e8tre de projet, avec suppression explicite. Aucun acc\u00e8s public aux mod\u00e8les ou \u00e0 la m\u00e9moire.",
     "developerName": "N\u00fcmtema",
     "category": "Productivity",
     "defaultPrompt": [
@@ -14,8 +14,8 @@
     "capabilities": []
   },
   "name": "numtema-synapse-cognitive-os",
-  "version": "0.7.0",
-  "description": "Synapse Cognitive OS : CoR/DAG, Mission Studio public anonyme, Ollama priv\u00e9 avec Reflexion v0.7 en double validation heuristique.",
+  "version": "0.8.0",
+  "description": "Synapse Cognitive OS : CoR/DAG, Mission Studio public anonyme, Ollama priv\u00e9, Reflexion et Cognitive Memory SQLite approuv\u00e9e, priv\u00e9e, \u00e0 r\u00e9tention born\u00e9e.",
   "author": {
     "name": "N\u00fcmtema"
   },
