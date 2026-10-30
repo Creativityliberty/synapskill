@@ -1,0 +1,66 @@
+name: synapse-private-ai
+services:
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    networks:
+      - synapse_private
+    volumes:
+      - ollama_models:/root/.ollama
+    # No ports or reverse-proxy labels: API stays inside the private Docker network.
+    read_only: true
+    tmpfs:
+      - /tmp:size=128m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: 256
+    mem_limit: 4g
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 15s
+      timeout: 8s
+      start_period: 90s
+      retries: 10
+
+  worker:
+    profiles: ["manual"]
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile.private-worker
+    depends_on:
+      ollama:
+        condition: service_healthy
+    networks:
+      - synapse_private
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: 100
+    mem_limit: 512m
+    environment:
+      - PYTHONDONTWRITEBYTECODE=1
+    entrypoint: ["python3", "/app/skills/numtema-synapse/scripts/private_live_probe.py"]
+    command:
+      - --execute
+      - --url
+      - http://ollama:11434
+      - --trusted-host
+      - ollama
+      - --model
+      - gemma3:1b
+      - --timeout-seconds
+      - "120"
+
+networks:
+  synapse_private:
+    internal: true
+
+volumes:
+  ollama_models:
+    name: synapse_private_ollama_models

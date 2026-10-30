@@ -1,3 +1,12 @@
+## v0.8.1 — Private Ollama Live Validation Kit (2026-10-30)
+
+- Docker Compose bootstrap à sorties réseau temporaires, sans ports publiés, pour télécharger `gemma3:1b`.
+- Stack Ollama + worker sur réseau Docker privé `internal: true` sans proxy ni ports.
+- Worker déclenché manuellement : vérification `api/tags`, appel JSON Ollama et exécution CoR/Reflexion ; verdict GO/NO-GO minimal, fail-closed.
+- Documentation Coolify/Docker et tests de non-exposition.
+- Aucun modèle réel exécuté depuis cet environnement ; absence de Docker et de daemon Ollama signalée.
+- Surface publique Mission Studio et MCP inchangée.
+
 ## v0.8.0 — Cognitive Memory privée (30 octobre 2026)
 - Leçons compactes à preuve SHA-256 cohérente avec un rapport Reflexion, créées uniquement après validation explicite d'un opérateur.
 - SQLite privé `0600`, lecture seule pour le worker, scope exact, expiration 1–365 jours, suppression unitaire / par projet / expirées.

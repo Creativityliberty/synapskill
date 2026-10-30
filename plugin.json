@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "numtema-synapse-cognitive-os",
-  "version": "0.8.0",
-  "description": "Synapse Cognitive OS : CoR/DAG, Mission Studio public anonyme, Ollama privé, Reflexion et Cognitive Memory SQLite approuvée, privée, à rétention bornée.",
+  "version": "0.8.1",
+  "description": "Synapse Cognitive OS : CoR/DAG, Mission Studio public anonyme, Ollama privé, Reflexion, Cognitive Memory et kit de validation Ollama isolé.",
   "author": {
     "name": "Nümtema"
   },
@@ -20,7 +20,7 @@
       "interface": {
         "displayName": "Nümtema Synapse Cognitive OS",
         "shortDescription": "CoR · Mission Studio · Cognitive Memory",
-        "longDescription": "Contrats CoR et DAG publics sans compte ; worker IA Ollama privé, Reflexion et leçons SQLite approuvées, limitées à un périmètre de projet, avec suppression explicite. Aucun accès public aux modèles ou à la mémoire.",
+        "longDescription": "CoR/DAG et Mission Studio sans compte ; worker Ollama, Reflexion et mémoire approuvée privés. Fournit un protocole Docker isolé de validation réelle sans exposer le modèle.",
         "developerName": "Nümtema",
         "category": "Productivity",
         "defaultPrompt": [
