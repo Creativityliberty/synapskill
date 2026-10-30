@@ -106,3 +106,11 @@ Reflexion ne consiste pas à réexécuter la même requête 3 fois. Enregistrer 
 ## Condition de fin de ce skill
 
 La mission est close seulement après livraison d'un artefact utile et critères de réussite satisfaits, ou constat précis de blocage/échec. Une description d'architecture n'est pas une preuve d'agent autonome, ni un programme exécuté.
+
+## Runtime IA privé et Reflexion v0.7
+
+- Le worker Ollama s'exécute **uniquement sur un hôte de confiance**, par `scripts/llm_runtime.py --execute`; l'API MCP publique sans authentification demeure limitée à quatre outils de préparation.
+- Activer `--reflexion` pour un contrôle en deux étapes : vérification déterministe, puis deuxième appel de critique via le même modèle ou `--reviewer-model` si un autre modèle est installé.
+- Les critiques sont **heuristiques** : une sortie `passed:true` n'est jamais une preuve de véracité, d'exactitude des sources ni de conformité réglementaire. Les verdicts malformés bloquent ; les corrections sont bornées et enregistrées en reçus sans texte de brouillon.
+- Lire `references/reflexion-v07.md` pour la configuration, le format de verdict et les limites. N'annoncer un test réel Ollama qu'après l'avoir réellement exécuté sur un service installé.
+
