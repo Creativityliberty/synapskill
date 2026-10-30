@@ -1,87 +1,105 @@
-# Nümtema Synapse Cognitive OS — Public MCP v0.4.1
+# Nümtema Synapse Cognitive OS — v0.8.0
 
-**Serveur MCP anonyme** pour préparation et validation de workflows CoR, RRLA, Reflexion et Agent Forge. Code source public ; les ressources privées du plugin ChatGPT ne sont pas publiées ici.
-
-## API publique sans authentification
-
-- `GET /mcp` : page de présentation limitée aux **4 outils publics**.
-- `POST /mcp`, `POST /jsonrpc` : JSON-RPC MCP HTTP.
-- `GET /sse` puis `POST /messages?session_id=...` : transport SSE historique conservé.
-- `GET /health` : santé et indication `execution_allowed: false`.
-
-Outils acceptés : `numtema.list_agents`, `numtema.validate_cor`, `numtema.compile_blueprint`, `numtema.plan_workflow`.
-
-**Interdits sur TOUS les transports publics :** `numtema.execute_workflow`, `numtema.recall_lessons`, toute écriture sur une base SQLite, les accès aux comptes et les opérations externes. Les identifiants, jetons et faux en-têtes client ne créent aucune permission. Le serveur local `mcp_server.py` garde ses six outils dans un environnement de confiance, distinct du serveur HTTP public.
-
-## Exécuter localement
+**v0.8 — Cognitive Memory privée et contrôlée :** leçons produites à partir de rapports CoR/Reflexion terminés et **approuvées manuellement** par un opérateur, SQLite avec rétention bornée, lecture limitée à une portée de projet et purge explicite. Le worker ouvre la mémoire en lecture seule, sans écriture automatique. La passerelle publique anonyme conserve exactement ses quatre outils de préparation, sans mémoire ni exécution LLM. Référence : [Cognitive Memory v0.8](skills/numtema-synapse/references/cognitive-memory-v08.md).
 
 ```bash
-python3 -m pip install -r requirements.txt
-python3 -m unittest discover -s skills/numtema-synapse/tests -v
-docker compose up --build -d
-curl http://127.0.0.1:8000/health
+# Tests
+python3 -m unittest discover -s skills/numtema-synapse/tests -q
+# Lecture depuis une DB existante ; jamais créée implicitement par le worker
+python3 skills/numtema-synapse/scripts/memory_cli.py --db ./state/cognitive-private.sqlite recall --scope projet-demo
 ```
 
-`Dockerfile` lance `mcp_http_server.py`. Dans Compose, le port est lié à `127.0.0.1` pour éviter d'exposer directement le HTTP non chiffré. Pour Coolify, configurer un domaine HTTPS pointant vers le port interne 8000 et redéployer volontairement la révision voulue.
+**Important :** approbation humaine ≠ certification de vérité. Aucune instance Ollama réelle n'était accessible dans l'environnement de développement ; le prochain test opérationnel doit s'effectuer sur l'hôte privé équipé du modèle.
 
-## Sécurité et limites
+# Nümtema Synapse Cognitive OS — v0.7.0
 
-- Aucune authentification utilisateur, aucun mot de passe, aucun Bearer, aucun OAuth.
-- Les en-têtes `Origin` sont rejetés par défaut. Pour autoriser un navigateur sur un domaine de confiance, configurer `SYNAPSE_ALLOWED_ORIGINS=https://exemple.fr` (origines HTTPS exactes, séparées par des virgules).
-- Taille maximale de requête : 1 Mo ; 32 connexions SSE simultanées ; 16 réponses en file par session ; 60 appels/minute par processus par défaut. Mettre aussi un plafond de débit au reverse proxy : les limites applicatives ne remplacent pas une protection réseau.
-- **Service public : ne jamais envoyer de secrets ou de données client confidentielles.** L'absence d'authentification interdit d'isoler correctement des locataires.
-- Les variables historiques `SYNAPSE_ALLOW_EXECUTE`, `SYNAPSE_STATE_DB` et `SYNAPSE_LESSONS_DB` n'activent rien dans le serveur HTTP public.
-- Les tests locaux ne prouvent pas que Coolify a déjà redéployé ni que chaque client MCP externe est compatible.
-
-## Vérification avant production
-
-Contrôler la liste exacte des quatre outils depuis `/mcp` et via SSE ; tenter des appels à `execute_workflow` et `recall_lessons` et obtenir un refus ; vérifier l'accès anonyme, l'origine rejetée, le volume des requêtes et les journaux proxy. Ne pas redéployer automatiquement depuis cette PR sans validation de l'instance Coolify existante.
-
-Voir `skills/numtema-synapse/SKILL.md` et les références pour l'architecture cognitive générale.
-
-## Dashboard web Synapse v0.4.2
-
-La route **GET /mcp** propose une interface Nümtema responsive (desktop et mobile) avec architecture CoR, registre des quatre outils publics, exemples HTTP/SSE et diagnostic interactif. Les assets locaux sont servis par `GET /assets/synapse.css` et `GET /assets/synapse.js` ; aucun CDN ni police distante. Les ressources sont protégées par une CSP restrictive.
-
-Le bouton « Tester la passerelle » réalise réellement `tools/list` et vérifie le refus des deux opérations sensibles, mais **n'exécute jamais** de workflow. Le contrôle `Origin` accepte les appels du même domaine et rejette les origines tierces non autorisées. Aucun login ou token demandé.
-
-Tests locaux : `python3 -m unittest discover -s skills/numtema-synapse/tests -q`. Une vérification locale ne remplace pas les contrôles sur le déploiement Coolify ; valider la version, les quatre outils et les refus après déploiement.
-
-## Mission Studio v0.5.0 — Préparer sans exécuter
-
-Le dashboard `GET /mcp` accueille désormais **Mission Studio** : formulaire guidé, presets conversion/cadrage/éditorial, compilation de trois contrats CoR 2.0 par `numtema.compile_blueprint`, contrôle DAG via `numtema.plan_workflow`, validation de chaque contrat via `numtema.validate_cor`, visualisation interactive et export de `mission.json` et `blueprint.json`. Les trois outils sont les appels MCP existants ; il ne s'agit pas d'une simulation visuelle.
-
-**Sans login ni jeton.** Aucun worker IA n'est lancé, aucune action externe, pas de mémoire persistante. Le formulaire soumet des données à une API publique anonyme : ne jamais saisir de secrets ou de données clients confidentielles. Les exports sont réalisés côté navigateur. Les profils des agents décrivent des rôles, pas des processus LLM autonomes.
-
-Tests : `python3 -m unittest discover -s skills/numtema-synapse/tests -q` (100 tests locaux), puis `SYNAPSE_TEST_URL=http://127.0.0.1:8000 node skills/numtema-synapse/tests/node_mission_studio_integration.js` avec serveur local démarré. Un contrôle visuel en navigateur reste nécessaire sur Coolify (environnement actuel : Chromium bloqué par la politique réseau).
-
-## v0.6.0 — Agent Runtime IA privé, sans authentification du Studio
-
-Mission Studio peut maintenant compiler un blueprint **à destination d'Ollama** via l'option « Préparer pour un agent IA local ». L'API publique n'exécute aucun modèle : elle accepte la **planification** `llm.draft`, mais refuse toujours les invocations d'exécution et d'accès SQLite.
-
-Le worker privé `skills/numtema-synapse/scripts/llm_runtime.py` utilise réellement `POST /api/chat` lorsque l'opérateur lance la commande locale avec `--execute` et qu'Ollama est disponible. Les appels et révisions sont bornés ; aucun stockage persistant ni action externe par le modèle. Une mission terminée est **structurellement** validée, pas factuellement certifiée.
+**v0.7 : Reflexion Engine privé (opt-in).** Après la génération d’un brouillon, Synapse impose les contrôles déterministes du contrat puis, si activé, un second appel LLM de critique. Une critique négative ou malformée bloque le livrable et réinjecte des corrections dans les tentatives restantes. Ce contrôle reste **heuristique**, pas une certification factuelle. L’interface MCP publique ne change pas et ne permet aucun appel LLM.
 
 ```bash
-python3 skills/numtema-synapse/scripts/llm_runtime.py \
-  skills/numtema-synapse/examples/blueprint-local-llm.json --model gemma3:1b
-# Dry-run PLANNED. Après installation et démarrage d'Ollama :
-python3 skills/numtema-synapse/scripts/llm_runtime.py \
-  skills/numtema-synapse/examples/blueprint-local-llm.json --model gemma3:1b --execute
-```
-
-**Le worker ne doit jamais être relié à un endpoint HTTP public sans authentification.** Il s'exécute depuis une machine ou un réseau de confiance, hors de la passerelle actuelle Coolify. Voir [le guide du runtime](skills/numtema-synapse/references/llm-runtime-v06.md). Les tests de bout en bout utilisent un serveur Ollama simulé, pas un modèle installé ; valider localement avec un vrai modèle avant tout usage réel.
-
-## Reflexion Engine v0.7.0 — Validation heuristique privée
-
-Le worker Ollama accepte `--reflexion` pour soumettre chaque brouillon à une **double validation** : les contrôles structurels CoR, puis une revue LLM séparée (`--reviewer-model` facultatif, pour choisir un autre modèle local). En cas de rejet, les défauts sont réinjectés dans une révision bornée. Le reçu contient l'empreinte SHA-256 du candidat et le verdict, jamais le brouillon complet.
-
-```bash
-# Planification : aucun modèle sollicité
+python3 -m unittest discover -s skills/numtema-synapse/tests -q
 python3 skills/numtema-synapse/scripts/llm_runtime.py skills/numtema-synapse/examples/blueprint-local-llm.json --model gemma3:1b --reflexion
-# Sur un hôte privé où Ollama et le(s) modèle(s) sont réellement installés :
+# Sur un hôte privé avec Ollama démarré, après installation du modèle :
 python3 skills/numtema-synapse/scripts/llm_runtime.py skills/numtema-synapse/examples/blueprint-local-llm.json --model gemma3:1b --reflexion --execute
 ```
 
-**L'évaluation est heuristique, jamais une vérification factuelle ou une garantie de conformité.** Un reviewer malformé refuse la validation. Le mode sans `--reflexion` conserve le comportement v0.6. Le serveur public anonyme reste limité aux quatre outils planificateurs, sans worker ni lecture SQLite. Voir [la documentation Reflexion](skills/numtema-synapse/references/reflexion-v07.md).
+Référence complète : [Reflexion v0.7](skills/numtema-synapse/references/reflexion-v07.md). **Le test avec un véritable modèle Ollama sur Coolify n’a pas été réalisé depuis cet environnement.**
 
-**Preuves disponibles :** 123 tests Python locaux, plus test CLI HTTP contre simulateur Ollama ; aucun modèle Ollama réel n'était accessible dans cette session. Validation de production et de vrai modèle encore requise.
+## Ancien runtime v0.6
+
+**Nouveauté : worker IA privé Ollama et préparation de tâches IA dans Mission Studio.** Le serveur MCP public reste anonyme, avec quatre outils de préparation uniquement. La vraie génération LLM se fait hors HTTP public : l'opérateur lance le worker CLI `llm_runtime.py --execute` sur une machine disposant d'Ollama. Aucun worker autonome n'est hébergé par ChatGPT et aucun modèle n'est fourni dans l'archive.
+
+Voir [le guide v0.6](skills/numtema-synapse/references/llm-runtime-v06.md) et l'exemple [`blueprint-local-llm.json`](skills/numtema-synapse/examples/blueprint-local-llm.json).
+
+```bash
+python3 -m unittest discover -s skills/numtema-synapse/tests -q
+python3 skills/numtema-synapse/scripts/llm_runtime.py skills/numtema-synapse/examples/blueprint-local-llm.json --model gemma3:1b
+# Si Ollama est bien installé, lancé et que le modèle est présent :
+python3 skills/numtema-synapse/scripts/llm_runtime.py skills/numtema-synapse/examples/blueprint-local-llm.json --model gemma3:1b --execute
+```
+
+## Version précédente (v0.5)
+
+# Nümtema Synapse Cognitive OS — v0.6.0
+
+## Mission Studio — nouvel atelier public (v0.5.0)
+
+La page `GET /mcp` inclut Mission Studio : trois modèles de mission (landing page, cadrage stratégique, plan éditorial), brief guidé, compilation de trois contrats CoR 2.0, planification DAG et validation structurale par `numtema.validate_cor`. Après validation, sélectionner les étapes pour inspecter leurs CoR et exporter séparément `mission.json` et `blueprint.json`. La compilation et la validation sont de **vrais appels JSON-RPC** aux trois outils publics existants.
+
+Aucune exécution LLM, aucune publication, aucune donnée conservée côté serveur, aucun cookie, aucun compte, aucun token. Les fichiers sont générés dans le navigateur seulement. Ne pas y saisir de secrets ni de données clients privées : le serveur est public et anonyme. Le formulaire ne déclenche jamais `execute_workflow` ni `recall_lessons`. Un contrat planifié n'est pas un livrable exécuté. Les agents de la liste représentent des rôles de workflow, pas des processus IA exécutants.
+
+**Lancer les tests :** `python3 -m unittest discover -s skills/numtema-synapse/tests -q`. Interface responsive : `GET /mcp`. API publique : `POST /mcp`, SSE historique : `GET /sse` puis `POST /messages`.
+
+## Évolution v0.4.1 — passerelle MCP publique sans authentification
+
+La passerelle HTTP expose `POST /mcp` **sans login, token, Bearer ni OAuth**. Les seuls outils publics sont `numtema.list_agents`, `numtema.validate_cor`, `numtema.compile_blueprint` et `numtema.plan_workflow`. Les fonctions `execute_workflow` et `recall_lessons` sont interdites à distance, même si un client fournit un en-tête Authorization ou prétend être administrateur.
+
+Le code est testé localement. **Le serveur Coolify existant n'a pas été modifié.** Déployer d'abord sur un service de staging distinct ; l'endpoint `/sse` existant n'est pas remplacé. Toute personne sur Internet pourra utiliser le service public : ne jamais y connecter des données privées, secrets ou outils d'action. HTTPS, limites de débit et de connexions côté proxy restent nécessaires. Voir `skills/numtema-synapse/references/mcp-hosted-v04.md`.
+
+## Ce qui est réellement exécutable
+
+- `scripts/agent_forge.py` : compilation d'un blueprint en contrats CoR 2.0 et DAG.
+- `scripts/forge_runtime.py` : moteur local de DAG, contrôles déterministes, corrections bornées, reprise SQLite optionnelle et approbations host-only pour adaptateurs sensibles.
+- `scripts/mcp_server.py` : serveur stdio MCP **réel**, sans dépendance Python externe, avec six outils : liste d'agents, validation CoR, compilation, planification, exécution locale opt-in et lecture opt-in des leçons.
+- Compatibilité JSON-RPC testée pour le protocole MCP `2026-07-28` (nouveau `server/discover`) et les initialisations héritées `2025-11-25`, `2025-06-18`, `2025-03-26`.
+
+## Démarrage rapide (Python 3.11+)
+
+Depuis le dossier de ce ZIP après extraction :
+
+```bash
+python3 -m unittest discover -s skills/numtema-synapse/tests -v
+python3 skills/numtema-synapse/scripts/mcp_server.py < skills/numtema-synapse/examples/mcp-protocol-demo.jsonl
+```
+
+Les commandes ci-dessus vérifient la suite et affichent trois réponses MCP sans exécuter de mission.
+
+Pour qu'un **hôte MCP stdio local** le lance, utiliser la configuration proposée dans `skills/numtema-synapse/examples/mcp-host-config.example.json` après adaptation du chemin absolu. Par défaut, la commande de lancement est :
+
+```bash
+python3 skills/numtema-synapse/scripts/mcp_server.py
+```
+
+Autoriser les **adaptateurs locaux uniquement** :
+
+```bash
+python3 skills/numtema-synapse/scripts/mcp_server.py --allow-execute
+```
+
+Exécution reproductible hors MCP :
+
+```bash
+python3 skills/numtema-synapse/scripts/agent_forge.py skills/numtema-synapse/examples/blueprint-landing-page.json --output /tmp/numtema-mission.json
+python3 skills/numtema-synapse/scripts/forge_runtime.py /tmp/numtema-mission.json --execute
+```
+
+## Sécurité et confidentialité
+
+L'exécution MCP est désactivée sans `--allow-execute`. Même activée, seuls quatre adaptateurs locaux de lecture/rédaction existent : `local.echo`, `local.extract_fields`, `local.render_template` et `local.assert_contains`. Aucun shell, HTTP, publication, publicité ou paiement n'est disponible ; les autorisations sensibles ne peuvent pas être forgées par les paramètres de mission. Aucune clé et aucun compte client ne figurent dans le ZIP. La mémoire persistante est **désactivée par défaut** : `--state-db` pour les reçus locaux, `--lessons-db` pour lire des leçons SQLite. Contrôler la rétention et les accès aux fichiers si ces options sont utilisées.
+
+Les tests unitaires, d'intégration et transport **ne constituent pas une certification MCP officielle ni une validation par un client MCP externe**.
+
+## Utilisation dans ChatGPT
+
+Le plugin privé fournit son skill et les fichiers sources. **L'ajout du plugin ne lance pas son serveur Python local, ne connecte aucun compte et ne crée pas un endpoint MCP hébergé.** Le serveur fonctionne uniquement lorsqu'un hôte compatible le démarre explicitement. Le mode conversationnel du skill reste utilisable dans ChatGPT sans le runtime.
+
+Documentation : `skills/numtema-synapse/references/mcp-stdio-v03.md` (local) et `skills/numtema-synapse/references/mcp-hosted-v04.md` (HTTP public sans auth).

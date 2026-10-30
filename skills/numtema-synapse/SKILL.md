@@ -114,3 +114,12 @@ La mission est close seulement après livraison d'un artefact utile et critères
 - Les critiques sont **heuristiques** : une sortie `passed:true` n'est jamais une preuve de véracité, d'exactitude des sources ni de conformité réglementaire. Les verdicts malformés bloquent ; les corrections sont bornées et enregistrées en reçus sans texte de brouillon.
 - Lire `references/reflexion-v07.md` pour la configuration, le format de verdict et les limites. N'annoncer un test réel Ollama qu'après l'avoir réellement exécuté sur un service installé.
 
+
+## Cognitive Memory privée v0.8
+
+- **Opt-in uniquement**, sans modification de la surface MCP HTTP/SSE publique anonyme (toujours quatre outils). La mémoire n'est jamais exposée comme endpoint et ne stocke rien automatiquement.
+- `scripts/cognitive_memory.py` conserve uniquement des leçons approuvées par un opérateur après un rapport CoR `COMPLETED`, contrôle déterministe réussi et dernier verdict Reflexion `PASSED` avec empreinte concordante. Même un verdict positif du modèle n'est pas une preuve factuelle.
+- `scripts/memory_cli.py` gère `approve`, `recall`, `delete`, `purge-scope`, `purge-expired`. Chaque approbation et chaque suppression exige une action explicite de l'opérateur privé ; durée de conservation 1–365 jours et portée exacte par projet.
+- Le worker lit via `--memory-db` **en mode SQLite read-only**, avec `--memory-scope` obligatoire. Les enseignements ne sont intégrés que comme données non fiables du contexte. Pas de création ni d'écriture automatique sur une mission réussie ; ne pas utiliser de données confidentielles dans les leçons.
+- Mode `--memory-db` absent : comportement v0.7 inchangé. Ne prétendre à aucune mémoire persistante de ChatGPT ; la base appartient seulement à l'hôte privé.
+- Référence : `references/cognitive-memory-v08.md`. Utiliser un volume privé pour SQLite, garder l'API publique sans authentification mais **sans accès aux leçons ni au modèle**.

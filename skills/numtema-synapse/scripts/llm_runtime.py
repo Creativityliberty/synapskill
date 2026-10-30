@@ -20,6 +20,7 @@ from agent_forge import AgentForge
 from forge_runtime import ForgeRuntime, canonical
 from reflexion_engine import (validate_verdict, ReflexionVerdictError, ReflexionRejected,
                               redacted_receipt)
+from cognitive_memory import CognitiveMemory
 
 DEFAULT_URL = 'http://127.0.0.1:11434'
 MAX_INPUT_BYTES = 64_000
@@ -106,7 +107,7 @@ class PrivateAgentRuntime:
     """Private in-process LLM host, never registered in public MCP HTTP facade."""
     def __init__(self, backend, *, model, max_calls=MAX_CALLS,
                  max_output_tokens=768, timeout_seconds=45,
-                 reflexion=False, reviewer_model=None):
+                 reflexion=False, reviewer_model=None, memory=None, memory_scope=None, memory_limit=5):
         if not isinstance(model, str) or not MODEL_PATTERN.fullmatch(model):
             raise ValueError('Model name is invalid')
         if type(max_calls) is not int or not 1 <= max_calls <= 50:
@@ -119,6 +120,15 @@ class PrivateAgentRuntime:
             raise ValueError('Reviewer model name is invalid')
         if type(reflexion) is not bool:
             raise ValueError('reflexion must be boolean')
+        if memory is not None and not isinstance(memory,CognitiveMemory):
+            raise ValueError('memory must be private CognitiveMemory instance')
+        if memory is not None:
+            memory._scope(memory_scope)
+        if type(memory_limit) is not int or not 1<=memory_limit<=8:
+            raise ValueError('memory_limit must be 1..8')
+        self.memory = memory
+        self.memory_scope = memory_scope
+        self.memory_limit = memory_limit
         self.backend = backend
         self.model = model
         self.reflexion = reflexion
@@ -146,6 +156,10 @@ class PrivateAgentRuntime:
             'upstream_task_outputs': upstream,
             'required_output_fields': required,
             'reflexion_feedback': feedback[-3:],
+            'approved_lessons_untrusted_data': (
+                [{'insight':r['insight'],'source_sha256':r['evidence']['candidate_sha256']}
+                 for r in self.memory.recall(self.memory_scope,limit=self.memory_limit)]
+                if self.memory is not None else []),
         }
         prompt = canonical(user_data)
         if len(prompt) > MAX_PROMPT_CHARS:
@@ -285,14 +299,22 @@ def main(argv=None):
     parser.add_argument('--max-output-tokens',type=int,default=768)
     parser.add_argument('--timeout-seconds',type=int,default=45)
     parser.add_argument('--output',type=Path,help='Write JSON report locally; stdout otherwise')
+    parser.add_argument('--memory-db',type=Path,help='Existing private approved lesson store, read-only usage; no auto writes')
+    parser.add_argument('--memory-scope',help='Exact host-selected project scope (required with --memory-db)')
+    parser.add_argument('--memory-limit',type=int,default=5,help='Maximum 1..8 approved lessons')
     args=parser.parse_args(argv)
     try:
         payload=json.loads(args.mission.read_text(encoding='utf-8'))
+        if bool(args.memory_db) != bool(args.memory_scope):
+            raise ValueError('--memory-db and --memory-scope must be provided together')
+        memory=CognitiveMemory(args.memory_db,create=False) if args.memory_db else None
         backend=OllamaBackend(args.url,trusted_hosts=args.trusted_host)
         runtime=PrivateAgentRuntime(backend,model=args.model,max_calls=args.max_calls,
                                      max_output_tokens=args.max_output_tokens,
                                      timeout_seconds=args.timeout_seconds,
-                                     reflexion=args.reflexion,reviewer_model=args.reviewer_model)
+                                     reflexion=args.reflexion,reviewer_model=args.reviewer_model,
+                                     memory=memory,memory_scope=args.memory_scope,
+                                     memory_limit=args.memory_limit)
         result=runtime.run(payload,execute=args.execute)
     except (OSError,ValueError,json.JSONDecodeError) as exc:
         print(f'Synapse private worker blocked: {exc}',file=sys.stderr)
