@@ -32,12 +32,12 @@ class PublicSynapseMCPServer(SynapseMCPServer):
             if isinstance(params, dict) and params.get('name') not in PUBLIC_TOOL_NAMES:
                 return rpc_error(msg.get('id'), -32602, 'Unknown public tool')
         result = super().handle(msg)
-        if isinstance(result, dict) and msg.get('method') == 'tools/list':
+        if isinstance(msg, dict) and isinstance(result, dict) and msg.get('method') == 'tools/list':
             listing = result.get('result')
             if isinstance(listing, dict) and isinstance(listing.get('tools'), list):
                 listing['tools'] = [tool for tool in listing['tools']
                                     if tool.get('name') in PUBLIC_TOOL_NAMES]
-        if isinstance(result, dict) and msg.get('method') == 'server/discover':
+        if isinstance(msg, dict) and isinstance(result, dict) and msg.get('method') == 'server/discover':
             discovery = result.get('result')
             if isinstance(discovery, dict):
                 discovery['instructions'] = (
