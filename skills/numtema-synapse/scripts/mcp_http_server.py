@@ -43,7 +43,7 @@ def _allowed_origins():
 
 ALLOWED_ORIGINS = _allowed_origins()
 mcp_engine = PublicSynapseMCPServer(max_calls_per_minute=MAX_CALLS)
-app = FastAPI(title='Nümtema Synapse MCP PUBLIC', version='0.4.2',
+app = FastAPI(title='Nümtema Synapse MCP PUBLIC', version='0.5.0',
               description='Anonymous planning and validation tools only')
 app.mount("/assets", StaticFiles(directory=str(WEB_ASSETS)), name="synapse-assets")
 app.add_middleware(CORSMiddleware, allow_origins=list(ALLOWED_ORIGINS),
@@ -105,7 +105,7 @@ async def _read_limited(request: Request) -> bytes | None:
 @app.get('/')
 @app.get('/health')
 async def health_check():
-    return {'status': 'healthy', 'server': SERVER_NAME, 'version': '0.4.2',
+    return {'status': 'healthy', 'server': SERVER_NAME, 'version': '0.5.0',
             'execution_allowed': False, 'public_tools': len(PUBLIC_TOOL_NAMES),
             'transport': ['http_post', 'sse'],
             'endpoints': {'mcp_post': '/mcp', 'mcp_sse': '/sse', 'messages': '/messages', 'health': '/health'}}

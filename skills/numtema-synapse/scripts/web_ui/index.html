@@ -8,6 +8,7 @@
   <title>Synapse Cognitive OS — Nümtema</title>
   <link rel="stylesheet" href="/assets/synapse.css">
   <script defer src="/assets/synapse.js"></script>
+  <script defer src="/assets/mission-studio.js"></script>
 </head>
 <body>
   <div class="ambient ambient-one" aria-hidden="true"></div>
@@ -21,6 +22,7 @@
       <div class="side-label">ESPACE SYSTÈME</div>
       <nav class="side-nav" aria-label="Rubriques">
         <a href="#overview" class="nav-link current"><span class="nav-icon" aria-hidden="true">◈</span> Vue d'ensemble</a>
+        <a href="#studio" class="nav-link"><span class="nav-icon" aria-hidden="true">✳</span> Mission Studio</a>
         <a href="#architecture" class="nav-link"><span class="nav-icon" aria-hidden="true">⌘</span> Architecture</a>
         <a href="#tools" class="nav-link"><span class="nav-icon" aria-hidden="true">▦</span> Outils MCP <span class="nav-count">04</span></a>
         <a href="#endpoints" class="nav-link"><span class="nav-icon" aria-hidden="true">⌁</span> API & endpoints</a>
@@ -34,7 +36,7 @@
     </aside>
     <main class="main" id="overview">
       <header class="topbar">
-        <div class="breadcrumb"><span class="crumb-root">Workspace</span><span aria-hidden="true" class="slash">/</span><strong>Synapse Cognitive OS</strong><span class="top-version">v0.4.2</span></div>
+        <div class="breadcrumb"><span class="crumb-root">Workspace</span><span aria-hidden="true" class="slash">/</span><strong>Synapse Cognitive OS</strong><span class="top-version">v0.5.0</span></div>
         <div class="top-actions"><span class="pill pill-public"><span class="tiny-dot"></span> PUBLIC ACCESS</span><a class="top-link" href="#endpoints">Documentation <span aria-hidden="true">↗</span></a></div>
       </header>
       <div class="page-content">
@@ -43,7 +45,7 @@
             <div class="eyebrow"><span class="eyebrow-line"></span> THE INTELLIGENCE LAYER <span class="eyebrow-suffix">/ 001</span></div>
             <h1 id="hero-title">Une intelligence.<br><span class="gradient-text">Mille connexions.</span></h1>
             <p class="hero-copy">L'architecture cognitive qui transforme vos intentions en missions structurées. Des contrats CoR précis, des workflows orchestrés et un contrôle à chaque étape.</p>
-            <div class="hero-actions"><a class="button button-primary" href="#tools">Explorer les outils <span aria-hidden="true">↗</span></a><a href="#endpoints" class="button button-ghost">Voir l'API <span aria-hidden="true">→</span></a></div>
+            <div class="hero-actions"><a class="button button-primary" href="#studio">Créer une mission <span aria-hidden="true">↗</span></a><a href="#endpoints" class="button button-ghost">Voir l'API <span aria-hidden="true">→</span></a></div>
             <div class="hero-meta"><span class="meta-mark" aria-hidden="true">✳</span> Aucun compte requis <span class="meta-separator">·</span> Préparation et validation uniquement</div>
           </div>
           <div class="hero-visual" aria-label="Schéma d'orchestration cognitive Synapse">
@@ -62,6 +64,57 @@
           <div class="metric"><span class="metric-label">OUTILS PUBLICS</span><div class="metric-value metric-number">04 <span class="metric-suffix">/ 04</span></div><div class="metric-note">Lecture · Planification · Validation</div></div>
           <div class="metric"><span class="metric-label">TRANSPORTS</span><div class="metric-value metric-number">02 <span class="metric-suffix">protocoles</span></div><div class="metric-note">HTTP JSON-RPC &amp; SSE</div></div>
           <div class="metric"><span class="metric-label">ACCÈS</span><div class="metric-value"><span class="access-icon" aria-hidden="true">↗</span> Anonyme</div><div class="metric-note">Sans compte ni jeton</div></div>
+        </section>
+
+        <section class="section mission-studio" id="studio" aria-labelledby="studio-title">
+          <div class="section-heading studio-heading">
+            <div>
+              <div class="section-kicker">MISSION STUDIO / 0.5</div>
+              <h2 id="studio-title">Donnez une direction. <span class="muted-heading">Synapse construit le plan.</span></h2>
+              <p class="section-intro">Un brief, trois contrats CoR et un DAG vérifié. L'atelier ne lance aucune exécution IA et n'enregistre aucune donnée sur le serveur.</p>
+            </div>
+            <span class="studio-mode"><span class="tiny-dot"></span> PLANNING ONLY</span>
+          </div>
+          <div class="studio-workspace">
+            <div class="studio-editor" aria-label="Définition de mission">
+              <div class="studio-panel-heading"><span class="studio-step">01</span><div><strong>Définir la mission</strong><small>Informations publiques ou fictives uniquement</small></div></div>
+              <div class="studio-form-fields">
+                <label class="studio-field" for="mission-preset"><span>Type de mission</span>
+                  <select id="mission-preset">
+                    <option value="landing">Landing page &amp; conversion</option>
+                    <option value="strategy">Cadrage stratégique</option>
+                    <option value="content">Plan éditorial</option>
+                  </select>
+                </label>
+                <label class="studio-field" for="mission-title"><span>Nom du projet <em>obligatoire</em></span><input id="mission-title" type="text" maxlength="100" required placeholder="Ex. Audit marketing — projet fictif" autocomplete="off"></label>
+                <label class="studio-field" for="mission-goal"><span>Objectif précis <em>obligatoire</em></span><textarea id="mission-goal" rows="3" maxlength="600" required placeholder="Quel résultat souhaites-tu obtenir ?"></textarea></label>
+                <div class="studio-field-row">
+                  <label class="studio-field" for="mission-offer"><span>Offre / sujet <em>obligatoire</em></span><input id="mission-offer" type="text" maxlength="140" required placeholder="Audit stratégique"></label>
+                  <label class="studio-field" for="mission-audience"><span>Public cible <em>obligatoire</em></span><input id="mission-audience" type="text" maxlength="140" required placeholder="Entrepreneurs et PME"></label>
+                </div>
+                <label class="studio-field" for="mission-benefit"><span>Résultat ou bénéfice <em>obligatoire</em></span><input id="mission-benefit" type="text" maxlength="200" required placeholder="Clarifier les priorités"></label>
+                <label class="studio-field" for="mission-constraints"><span>Contraintes et précautions <small>(optionnel)</small></span><textarea id="mission-constraints" maxlength="400" rows="2" placeholder="Aucune preuve inventée ; aucune publication…"></textarea></label>
+              </div>
+              <p class="studio-privacy"><span aria-hidden="true">◈</span> Tout brief envoyé à l'API publique doit être non confidentiel. Aucun historique de mission n'est conservé ici.</p>
+              <div class="studio-actions"><button class="button button-primary" type="button" id="studio-generate">Compiler la mission <span aria-hidden="true">↗</span></button><button class="button button-ghost" type="button" id="studio-demo">Charger un exemple</button></div>
+              <div class="studio-message" id="studio-message" role="status" aria-live="polite">Prêt à construire votre premier workflow.</div>
+            </div>
+            <div class="studio-preview" aria-label="Plan de mission">
+              <div class="studio-panel-heading"><span class="studio-step">02</span><div><strong>Visualiser le workflow</strong><small>Contrats · Dépendances · Vérifications</small></div><span class="studio-result-tag" id="studio-state">EN ATTENTE</span></div>
+              <div class="studio-empty" id="studio-empty">
+                <div class="studio-empty-orbit" aria-hidden="true"><span>◇</span><span>⌘</span><span>✓</span></div>
+                <strong>Votre workflow commence ici.</strong>
+                <p>Renseignez le brief puis compilez. Le DAG et les contrats CoR apparaîtront dans cet espace.</p>
+              </div>
+              <div class="studio-output" id="studio-output" hidden>
+                <div class="studio-summary"><span id="studio-mission-label">MISSION</span><strong id="studio-mission-name"></strong><small id="studio-order"></small></div>
+                <div class="studio-dag" id="studio-dag" aria-label="Étapes du workflow"></div>
+                <div class="studio-inspector"><div class="studio-inspector-top"><span>CONTRACT INSPECTOR</span><span id="studio-validation">—</span></div><div class="studio-inspector-body"><strong id="studio-contract-name"></strong><p id="studio-contract-objective"></p><div class="studio-inspector-meta" id="studio-contract-meta"></div><details><summary>Voir le contrat CoR JSON</summary><pre id="studio-contract-json"></pre></details></div></div>
+                <div class="studio-export-row"><button class="button button-primary" type="button" id="studio-export">Exporter mission JSON ⤓</button><button class="button button-ghost" type="button" id="studio-export-blueprint">Blueprint JSON ⤓</button></div>
+              </div>
+            </div>
+          </div>
+          <div class="studio-bottom"><div><span class="tiny-dot"></span> <strong>CoR CONTRACT</strong><small> Mission bornée et vérifiable</small></div><div><span class="tiny-dot"></span> <strong>DAG PLANNING</strong><small> Dépendances contrôlées</small></div><div><span class="tiny-dot"></span> <strong>NO EXECUTION</strong><small> Aucun worker déclenché</small></div></div>
         </section>
         <section class="section architecture" id="architecture" aria-labelledby="arch-title">
           <div class="section-heading"><div><div class="section-kicker">01 / ARCHITECTURE</div><h2 id="arch-title">De l'intention à l'exécution <span class="muted-heading">contrôlée.</span></h2></div><span class="section-annotation">COGNITIVE WORKFLOW</span></div>
