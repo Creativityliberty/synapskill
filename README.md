@@ -1,3 +1,21 @@
+# Nümtema Synapse Cognitive OS — v0.8.1
+
+**Tests sur une machine neuve :** `python3 -m pip install -r requirements-test.txt` puis `python3 -m unittest discover -s skills/numtema-synapse/tests -q`. La validation Docker Compose reste distincte et requiert Docker sur le serveur privé.
+
+**Nouveau : kit reproductible pour valider une vraie inférence Ollama + CoR + Reflexion sur un hôte privé.** Aucun changement des quatre outils MCP publics, aucune authentification utilisateur ajoutée, aucune exécution distante publique. Voir [`private-ollama-validation-v081.md`](skills/numtema-synapse/references/private-ollama-validation-v081.md).
+
+Le kit comprend une pile Docker isolée sans port publié, une phase distincte de téléchargement du modèle, un worker déclenché manuellement et un rapport GO/NO-GO sans contenu de mission. Aucun modèle n'a été exécuté sur l'infrastructure Coolify depuis l'environnement de préparation : cette version facilite **une validation à réaliser**, elle ne la revendique pas comme accomplie.
+
+```bash
+# Depuis la racine du dépôt sur le serveur Docker privé
+docker compose -f deployment/ollama-bootstrap.compose.yml up -d ollama
+docker compose -f deployment/ollama-bootstrap.compose.yml exec -T ollama ollama pull gemma3:1b
+docker compose -f deployment/ollama-bootstrap.compose.yml down
+docker compose -f deployment/ollama-private.compose.yml up -d ollama
+docker compose -f deployment/ollama-private.compose.yml run --rm -T worker > /tmp/synapse-private-e2e.json
+cat /tmp/synapse-private-e2e.json
+```
+
 # Nümtema Synapse Cognitive OS — v0.8.0
 
 **v0.8 — Cognitive Memory privée et contrôlée :** leçons produites à partir de rapports CoR/Reflexion terminés et **approuvées manuellement** par un opérateur, SQLite avec rétention bornée, lecture limitée à une portée de projet et purge explicite. Le worker ouvre la mémoire en lecture seule, sans écriture automatique. La passerelle publique anonyme conserve exactement ses quatre outils de préparation, sans mémoire ni exécution LLM. Référence : [Cognitive Memory v0.8](skills/numtema-synapse/references/cognitive-memory-v08.md).

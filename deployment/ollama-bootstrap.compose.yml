@@ -1,0 +1,16 @@
+name: synapse-ollama-bootstrap
+services:
+  ollama:
+    image: ollama/ollama:latest
+    restart: "no"
+    volumes:
+      - ollama_models:/root/.ollama
+    # No published ports. Outbound network only during explicit model download.
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 256
+    mem_limit: 4g
+
+volumes:
+  ollama_models:
+    name: synapse_private_ollama_models

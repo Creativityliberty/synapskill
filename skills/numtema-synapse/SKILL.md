@@ -123,3 +123,8 @@ La mission est close seulement après livraison d'un artefact utile et critères
 - Le worker lit via `--memory-db` **en mode SQLite read-only**, avec `--memory-scope` obligatoire. Les enseignements ne sont intégrés que comme données non fiables du contexte. Pas de création ni d'écriture automatique sur une mission réussie ; ne pas utiliser de données confidentielles dans les leçons.
 - Mode `--memory-db` absent : comportement v0.7 inchangé. Ne prétendre à aucune mémoire persistante de ChatGPT ; la base appartient seulement à l'hôte privé.
 - Référence : `references/cognitive-memory-v08.md`. Utiliser un volume privé pour SQLite, garder l'API publique sans authentification mais **sans accès aux leçons ni au modèle**.
+
+
+## Validation réelle du worker Ollama sur Coolify (v0.8.1)
+
+Quand une mission nécessite la preuve de fonctionnement avec un vrai modèle, charger `references/private-ollama-validation-v081.md`. Ne pas confondre tests simulés avec une inférence réelle. La pile Docker privée est distincte de l’API publique ; ne pas lancer de modèle, proxy ni mémoire sur `/mcp` ou `/sse`. Aucun accès Docker / Coolify ne doit être présumé sans preuve.
