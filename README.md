@@ -38,3 +38,11 @@ curl http://127.0.0.1:8000/health
 Contrôler la liste exacte des quatre outils depuis `/mcp` et via SSE ; tenter des appels à `execute_workflow` et `recall_lessons` et obtenir un refus ; vérifier l'accès anonyme, l'origine rejetée, le volume des requêtes et les journaux proxy. Ne pas redéployer automatiquement depuis cette PR sans validation de l'instance Coolify existante.
 
 Voir `skills/numtema-synapse/SKILL.md` et les références pour l'architecture cognitive générale.
+
+## Dashboard web Synapse v0.4.2
+
+La route **GET /mcp** propose une interface Nümtema responsive (desktop et mobile) avec architecture CoR, registre des quatre outils publics, exemples HTTP/SSE et diagnostic interactif. Les assets locaux sont servis par `GET /assets/synapse.css` et `GET /assets/synapse.js` ; aucun CDN ni police distante. Les ressources sont protégées par une CSP restrictive.
+
+Le bouton « Tester la passerelle » réalise réellement `tools/list` et vérifie le refus des deux opérations sensibles, mais **n'exécute jamais** de workflow. Le contrôle `Origin` accepte les appels du même domaine et rejette les origines tierces non autorisées. Aucun login ou token demandé.
+
+Tests locaux : `python3 -m unittest discover -s skills/numtema-synapse/tests -q`. Une vérification locale ne remplace pas les contrôles sur le déploiement Coolify ; valider la version, les quatre outils et les refus après déploiement.

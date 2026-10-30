@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "numtema-synapse-cognitive-os",
-  "version": "0.3.0",
-  "description": "Nümtema Synapse Cognitive OS : CoR, RRLA, Reflexion, Agent Forge et serveur MCP stdio local dual-era (sans compte externe).",
+  "version": "0.4.2",
+  "description": "Nümtema Synapse Cognitive OS : CoR, RRLA, Reflexion et Agent Forge ; passerelle MCP publique anonyme et dashboard premium.",
   "author": {
     "name": "Nümtema"
   },
@@ -19,8 +19,8 @@
     "com.openai": {
       "interface": {
         "displayName": "Nümtema Synapse Cognitive OS",
-        "shortDescription": "CoR, RRLA et MCP local",
-        "longDescription": "Skills Nümtema pour missions CoR, RRLA, Reflexion et Agent Forge. Contient un serveur MCP stdio exécutable localement par un hôte compatible ; les scripts du plugin ne démarrent pas automatiquement dans ChatGPT.",
+        "shortDescription": "CoR, RRLA et MCP public sans auth",
+        "longDescription": "Skill Nümtema avec Agent Forge, CoR, RRLA et Reflexion. Inclut un MCP stdio local et une passerelle HTTP publique sans login ni token, limitée à quatre outils non sensibles. Déploiement externe séparé ; aucune exécution automatique dans ChatGPT.",
         "developerName": "Nümtema",
         "category": "Productivity",
         "defaultPrompt": [
