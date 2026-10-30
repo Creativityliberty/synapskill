@@ -16,6 +16,7 @@ from urllib.parse import urlsplit
 
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 
 SCRIPTS_DIR = Path(__file__).resolve().parent
@@ -28,6 +29,7 @@ from public_mcp_policy import PublicSynapseMCPServer, PUBLIC_TOOL_NAMES
 
 MAX_CALLS = min(max(int(os.getenv('SYNAPSE_MAX_CALLS_PER_MIN', '60')), 1), 1000)
 MAX_SSE_CLIENTS = 32
+WEB_ASSETS = SCRIPTS_DIR / "web_ui"
 
 
 def _allowed_origins():
@@ -41,8 +43,9 @@ def _allowed_origins():
 
 ALLOWED_ORIGINS = _allowed_origins()
 mcp_engine = PublicSynapseMCPServer(max_calls_per_minute=MAX_CALLS)
-app = FastAPI(title='Nümtema Synapse MCP PUBLIC', version='0.4.1',
+app = FastAPI(title='Nümtema Synapse MCP PUBLIC', version='0.4.2',
               description='Anonymous planning and validation tools only')
+app.mount("/assets", StaticFiles(directory=str(WEB_ASSETS)), name="synapse-assets")
 app.add_middleware(CORSMiddleware, allow_origins=list(ALLOWED_ORIGINS),
                    allow_credentials=False, allow_methods=['GET', 'POST'],
                    allow_headers=['Content-Type', 'Accept', 'MCP-Protocol-Version', 'Mcp-Method', 'Mcp-Name'])
@@ -57,12 +60,28 @@ async def security_headers(request: Request, call_next):
     response.headers['Cache-Control'] = 'no-store'
     response.headers['X-Content-Type-Options'] = 'nosniff'
     response.headers['Referrer-Policy'] = 'no-referrer'
+    response.headers['Content-Security-Policy'] = (
+        "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; "
+        "font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; "
+        "form-action 'none'; frame-ancestors 'none'"
+    )
     return response
 
 
 def _origin_denied(request: Request) -> bool:
     origin = request.headers.get('origin')
-    return origin is not None and origin not in ALLOWED_ORIGINS
+    if origin is None:
+        return False
+    # Browser POST requests include Origin even when they come from this page.
+    # Compare exact scheme and authority, using Host because Coolify terminates TLS.
+    parsed = urlsplit(origin)
+    host = request.headers.get('host', '')
+    is_exact_origin = (parsed.scheme in ('https', 'http')
+                       and parsed.netloc.lower() == host.lower()
+                       and not any((parsed.path, parsed.query, parsed.fragment,
+                                    parsed.username, parsed.password)))
+    return not (is_exact_origin or origin in ALLOWED_ORIGINS)
+
 
 
 async def _read_limited(request: Request) -> bytes | None:
@@ -86,7 +105,7 @@ async def _read_limited(request: Request) -> bytes | None:
 @app.get('/')
 @app.get('/health')
 async def health_check():
-    return {'status': 'healthy', 'server': SERVER_NAME, 'version': '0.4.1',
+    return {'status': 'healthy', 'server': SERVER_NAME, 'version': '0.4.2',
             'execution_allowed': False, 'public_tools': len(PUBLIC_TOOL_NAMES),
             'transport': ['http_post', 'sse'],
             'endpoints': {'mcp_post': '/mcp', 'mcp_sse': '/sse', 'messages': '/messages', 'health': '/health'}}
@@ -94,14 +113,8 @@ async def health_check():
 
 @app.get('/mcp')
 async def mcp_browser_view():
-    """Keep the existing browser-friendly GET route without exposing private tools."""
-    items = ''.join(f'<li><code>{t["name"]}</code></li>' for t in TOOLS if t['name'] in PUBLIC_TOOL_NAMES)
-    return HTMLResponse('<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8">'
-                        '<title>Nümtema Synapse MCP</title></head><body>'
-                        '<h1>Nümtema Synapse Cognitive OS v0.4.1</h1>'
-                        '<p>Passerelle publique anonyme : préparation et validation uniquement.</p>'
-                        '<p>POST /mcp · GET /sse · POST /messages</p>'
-                        f'<p>Outils publics ({len(PUBLIC_TOOL_NAMES)}) :</p><ul>{items}</ul></body></html>')
+    """Static, accessible status and tools page; independent of JSON-RPC POST."""
+    return HTMLResponse((WEB_ASSETS / "index.html").read_text(encoding="utf-8"))
 
 
 @app.post('/mcp')

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080d18">
+  <meta name="description" content="Nümtema Synapse Cognitive OS — Passerelle MCP publique, orchestration CoR, workflows et validation.">
+  <title>Synapse Cognitive OS — Nümtema</title>
+  <link rel="stylesheet" href="/assets/synapse.css">
+  <script defer src="/assets/synapse.js"></script>
+</head>
+<body>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+  <div class="shell">
+    <aside class="sidebar" aria-label="Navigation principale">
+      <a href="#overview" class="brand" aria-label="Nümtema Synapse, accueil">
+        <span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 42 42" fill="none"><path d="M9 31V11L33 31V11" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="33" cy="11" r="3" fill="currentColor"/></svg></span>
+        <span class="brand-text"><strong>NÜMTEMA</strong><small>SYNAPSE OS</small></span>
+      </a>
+      <div class="side-label">ESPACE SYSTÈME</div>
+      <nav class="side-nav" aria-label="Rubriques">
+        <a href="#overview" class="nav-link current"><span class="nav-icon" aria-hidden="true">◈</span> Vue d'ensemble</a>
+        <a href="#architecture" class="nav-link"><span class="nav-icon" aria-hidden="true">⌘</span> Architecture</a>
+        <a href="#tools" class="nav-link"><span class="nav-icon" aria-hidden="true">▦</span> Outils MCP <span class="nav-count">04</span></a>
+        <a href="#endpoints" class="nav-link"><span class="nav-icon" aria-hidden="true">⌁</span> API & endpoints</a>
+        <a href="#diagnose" class="nav-link"><span class="nav-icon" aria-hidden="true">✓</span> Diagnostic</a>
+      </nav>
+      <div class="sidebar-foot">
+        <div class="foot-symbol" aria-hidden="true">✦</div>
+        <div><span class="foot-title">Conçu pour orchestrer</span><span class="foot-sub">la complexité, simplement.</span></div>
+        <div class="copyright">© 2026 Nümtema · Cognitive systems</div>
+      </div>
+    </aside>
+    <main class="main" id="overview">
+      <header class="topbar">
+        <div class="breadcrumb"><span class="crumb-root">Workspace</span><span aria-hidden="true" class="slash">/</span><strong>Synapse Cognitive OS</strong><span class="top-version">v0.4.2</span></div>
+        <div class="top-actions"><span class="pill pill-public"><span class="tiny-dot"></span> PUBLIC ACCESS</span><a class="top-link" href="#endpoints">Documentation <span aria-hidden="true">↗</span></a></div>
+      </header>
+      <div class="page-content">
+        <section class="hero" aria-labelledby="hero-title">
+          <div class="hero-main">
+            <div class="eyebrow"><span class="eyebrow-line"></span> THE INTELLIGENCE LAYER <span class="eyebrow-suffix">/ 001</span></div>
+            <h1 id="hero-title">Une intelligence.<br><span class="gradient-text">Mille connexions.</span></h1>
+            <p class="hero-copy">L'architecture cognitive qui transforme vos intentions en missions structurées. Des contrats CoR précis, des workflows orchestrés et un contrôle à chaque étape.</p>
+            <div class="hero-actions"><a class="button button-primary" href="#tools">Explorer les outils <span aria-hidden="true">↗</span></a><a href="#endpoints" class="button button-ghost">Voir l'API <span aria-hidden="true">→</span></a></div>
+            <div class="hero-meta"><span class="meta-mark" aria-hidden="true">✳</span> Aucun compte requis <span class="meta-separator">·</span> Préparation et validation uniquement</div>
+          </div>
+          <div class="hero-visual" aria-label="Schéma d'orchestration cognitive Synapse">
+            <div class="visual-grid" aria-hidden="true"></div>
+            <div class="corner corner-tl"></div><div class="corner corner-br"></div>
+            <div class="orbit orbit-outer"></div><div class="orbit orbit-inner"></div>
+            <span class="orbit-point point-a"></span><span class="orbit-point point-b"></span><span class="orbit-point point-c"></span>
+            <div class="central-core"><div class="core-glow"></div><svg viewBox="0 0 92 92" fill="none" aria-hidden="true"><path d="M20 70V22L72 70V22" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 22L72 70" stroke="currentColor" stroke-width="2" opacity=".36"/><circle cx="72" cy="22" r="6" fill="currentColor"/></svg></div>
+            <div class="visual-tag tag-top"><span class="tag-dot"></span> SYNAPSE ENGINE</div>
+            <div class="visual-tag tag-bottom">CoR 2.0 <span>→</span> DAG <span>→</span> VALIDATION</div>
+            <span class="visual-coord coord-top">48°52′</span><span class="visual-coord coord-bottom">N / 04 SYSTEMS</span>
+          </div>
+        </section>
+        <section class="metrics" aria-label="Statut de la passerelle">
+          <div class="metric"><span class="metric-label">ÉTAT DU SERVEUR</span><div class="metric-value"><span id="health-dot" class="status-light checking"></span><span id="health-status" aria-live="polite">Vérification…</span></div><div class="metric-note">Diagnostic HTTP <code>/health</code></div></div>
+          <div class="metric"><span class="metric-label">OUTILS PUBLICS</span><div class="metric-value metric-number">04 <span class="metric-suffix">/ 04</span></div><div class="metric-note">Lecture · Planification · Validation</div></div>
+          <div class="metric"><span class="metric-label">TRANSPORTS</span><div class="metric-value metric-number">02 <span class="metric-suffix">protocoles</span></div><div class="metric-note">HTTP JSON-RPC &amp; SSE</div></div>
+          <div class="metric"><span class="metric-label">ACCÈS</span><div class="metric-value"><span class="access-icon" aria-hidden="true">↗</span> Anonyme</div><div class="metric-note">Sans compte ni jeton</div></div>
+        </section>
+        <section class="section architecture" id="architecture" aria-labelledby="arch-title">
+          <div class="section-heading"><div><div class="section-kicker">01 / ARCHITECTURE</div><h2 id="arch-title">De l'intention à l'exécution <span class="muted-heading">contrôlée.</span></h2></div><span class="section-annotation">COGNITIVE WORKFLOW</span></div>
+          <div class="architecture-card"><div class="arch-main">
+            <div class="flow-step"><span class="step-count">01</span><span class="step-symbol">◇</span><strong>INTENTION</strong><small>Clarifier le besoin</small></div>
+            <span class="flow-arrow" aria-hidden="true">⟶</span>
+            <div class="flow-step"><span class="step-count">02</span><span class="step-symbol">◈</span><strong>CoR CONTRACT</strong><small>Encadrer la mission</small></div>
+            <span class="flow-arrow" aria-hidden="true">⟶</span>
+            <div class="flow-step"><span class="step-count">03</span><span class="step-symbol">⌘</span><strong>AGENT FORGE</strong><small>Compiler le DAG</small></div>
+            <span class="flow-arrow" aria-hidden="true">⟶</span>
+            <div class="flow-step"><span class="step-count">04</span><span class="step-symbol">✓</span><strong>VALIDATION</strong><small>Vérifier les critères</small></div>
+          </div><div class="arch-footer"><span class="small-indicator"></span> Workflow de préparation seulement <span class="arch-foot-right">Aucune exécution distante</span></div></div>
+        </section>
+        <section class="section" id="tools" aria-labelledby="tools-title">
+          <div class="section-heading"><div><div class="section-kicker">02 / TOOL REGISTRY</div><h2 id="tools-title">Les outils de <span class="muted-heading">Synapse.</span></h2><p class="section-intro">Quatre capacités publiques, conçues pour structurer, orchestrer et vérifier les missions.</p></div><span class="count-chip">04 MODULES</span></div>
+          <div class="tool-grid">
+            <article class="tool-card"><div class="tool-top"><span class="tool-glyph">◇</span><span class="tool-index">01 — REGISTRY</span></div><h3>Agent Registry</h3><p>Découvrir les rôles conceptuels et leurs responsabilités dans l'univers Synapse.</p><code>numtema.list_agents</code><span class="tool-state"><span class="tiny-dot"></span> Lecture seule</span></article>
+            <article class="tool-card"><div class="tool-top"><span class="tool-glyph">⌘</span><span class="tool-index">02 — AGENT FORGE</span></div><h3>Blueprint Compiler</h3><p>Transformer un blueprint en mission structurée avec contrats CoR et graphe DAG.</p><code>numtema.compile_blueprint</code><span class="tool-state"><span class="tiny-dot"></span> Préparation</span></article>
+            <article class="tool-card"><div class="tool-top"><span class="tool-glyph">▥</span><span class="tool-index">03 — WORKFLOW</span></div><h3>Workflow Planner</h3><p>Contrôler les dépendances d'une mission et obtenir un ordre d'exécution cohérent.</p><code>numtema.plan_workflow</code><span class="tool-state"><span class="tiny-dot"></span> Planification</span></article>
+            <article class="tool-card"><div class="tool-top"><span class="tool-glyph">✓</span><span class="tool-index">04 — QUALITY</span></div><h3>CoR Validator</h3><p>Valider la structure des contrats et signaler les critères incomplets ou invalides.</p><code>numtema.validate_cor</code><span class="tool-state"><span class="tiny-dot"></span> Vérification</span></article>
+          </div>
+        </section>
+        <section class="section" id="endpoints" aria-labelledby="api-title">
+          <div class="section-heading"><div><div class="section-kicker">03 / DEVELOPER ACCESS</div><h2 id="api-title">Connecter vos outils. <span class="muted-heading">Simplement.</span></h2><p class="section-intro">Deux transports, la même politique publique. Aucune authentification requise.</p></div></div>
+          <div class="api-layout"><div class="api-card"><div class="api-header"><div><span class="api-prompt">//</span> POINTS D'ACCÈS</div><span class="api-version">MCP · JSON-RPC 2.0</span></div>
+            <div class="endpoint"><span class="verb verb-post">POST</span><div class="endpoint-data"><code id="http-endpoint">/mcp</code><small>Appels d'outils JSON-RPC</small></div><button class="copy-icon" type="button" data-copy="/mcp" aria-label="Copier l'adresse de l'endpoint HTTP">⧉</button></div>
+            <div class="endpoint"><span class="verb verb-get">GET</span><div class="endpoint-data"><code id="sse-endpoint">/sse</code><small>Flux Server-Sent Events historique</small></div><button class="copy-icon" type="button" data-copy="/sse" aria-label="Copier l'adresse de l'endpoint SSE">⧉</button></div>
+            <div class="endpoint"><span class="verb verb-post">POST</span><div class="endpoint-data"><code>/messages</code><small>Messages des sessions SSE</small></div><button class="copy-icon" type="button" data-copy="/messages" aria-label="Copier l'adresse de l'endpoint messages">⧉</button></div>
+            <div class="api-footer"><span class="tiny-dot"></span> HTTPS recommandé en production <span class="api-foot-right">AUCUN TOKEN</span></div>
+          </div><div class="code-card"><div class="code-header"><span><span class="code-dot"></span> QUICK START</span><div class="code-switch" aria-label="Exemple de transport"><button type="button" class="switch-btn active" data-example="http" aria-pressed="true">HTTP</button><button type="button" class="switch-btn" data-example="sse" aria-pressed="false">SSE</button></div></div><pre class="code-sample"><code id="request-snippet">curl -X POST https://synapse.coolify.dallico.com/mcp \
+  -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,
+    "method":"tools/list","params":{...}}'</code></pre><div class="code-footer"><span>EXEMPLE DE CONNEXION</span><button type="button" class="copy-snippet" id="copy-example">Copier le code ⧉</button></div></div></div>
+        </section>
+        <section class="section" id="diagnose" aria-labelledby="diag-title">
+          <div class="section-heading"><div><div class="section-kicker">04 / LIVE DIAGNOSTICS</div><h2 id="diag-title">Vérifier. <span class="muted-heading">Avant d'agir.</span></h2><p class="section-intro">Un test réel de la liste des outils et des limites publiques, sans exécuter de workflow.</p></div></div>
+          <div class="diagnostic-card"><div class="diagnostic-left"><span class="diag-emblem" aria-hidden="true">⌁</span><div><strong>API connectivity check</strong><p>Contrôle HTTP anonyme · 4 outils attendus · 2 opérations interdites</p></div></div><div class="diagnostic-right"><button id="run-diagnostics" type="button" class="button button-primary"><span aria-hidden="true">↻</span> Tester la passerelle</button></div></div>
+          <div id="diagnostic-result" class="diagnostic-result" role="status" aria-live="polite">Le diagnostic n'a pas encore été lancé.</div>
+        </section>
+        <footer class="site-footer"><span>© 2026 NÜMTEMA · Synapse Cognitive OS</span><span>Conçu pour clarifier, orchestrer, valider. <span class="footer-spark" aria-hidden="true">✳</span></span></footer>
+      </div>
+    </main>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

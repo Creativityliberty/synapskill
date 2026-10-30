@@ -1,8 +1,8 @@
 {
   "interface": {
     "displayName": "N\u00fcmtema Synapse Cognitive OS",
-    "shortDescription": "CoR, RRLA et MCP local",
-    "longDescription": "Skills N\u00fcmtema pour missions CoR, RRLA, Reflexion et Agent Forge. Contient un serveur MCP stdio ex\u00e9cutable localement par un h\u00f4te compatible ; les scripts du plugin ne d\u00e9marrent pas automatiquement dans ChatGPT.",
+    "shortDescription": "CoR, RRLA et MCP public sans auth",
+    "longDescription": "Skill N\u00fcmtema avec Agent Forge, CoR, RRLA et Reflexion. Inclut un MCP stdio local et une passerelle HTTP publique sans login ni token, limit\u00e9e \u00e0 quatre outils non sensibles. D\u00e9ploiement externe s\u00e9par\u00e9 ; aucune ex\u00e9cution automatique dans ChatGPT.",
     "developerName": "N\u00fcmtema",
     "category": "Productivity",
     "defaultPrompt": [
@@ -14,8 +14,8 @@
     "capabilities": []
   },
   "name": "numtema-synapse-cognitive-os",
-  "version": "0.3.0",
-  "description": "N\u00fcmtema Synapse Cognitive OS : CoR, RRLA, Reflexion, Agent Forge et serveur MCP stdio local dual-era (sans compte externe).",
+  "version": "0.4.2",
+  "description": "N\u00fcmtema Synapse Cognitive OS : CoR, RRLA, Reflexion et Agent Forge ; passerelle MCP publique anonyme et dashboard premium.",
   "author": {
     "name": "N\u00fcmtema"
   },
